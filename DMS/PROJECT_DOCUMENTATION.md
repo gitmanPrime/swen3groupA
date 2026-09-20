@@ -29,6 +29,24 @@ We use C# with .NET 10 and ASP.NET Core controllers.
 This meets the project requirements.
 We use xUnit for unit testing and Visual Studio 2026 for development.
 
+### ADR-004: Document collections as the additional use case
+Users can organize documents into named collections.
+A document can belong to multiple collections.
+We represent membership through a DocumentCollection entity.
+Removing a membership does not delete the document.
+
+### ADR-005: Entity property access
+Identifiers and creation timestamps have private setters.
+Editable metadata has public setters, with validation performed
+by BLL services. Entities must not be bound directly to API requests;
+the API uses DTOs.
+
+### ADR-006: Document collection membership
+DocumentCollection connects documents and collections using their IDs.
+The pair (DocumentId, CollectionId) will be the composite primary key,
+preventing the same document from appearing twice in one collection.
+Membership IDs have private setters and are supplied through a constructor.
+
 ## Progress
 - Created the layered solution and unit test project.
 - Added project references.
