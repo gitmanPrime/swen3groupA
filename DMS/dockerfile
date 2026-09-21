@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1
+
+# Build context is the solution folder (where DMS.sln and src/ are located.)
+
+# ---------- Build stage ----------
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# First, just copy the .csproj files so that the NuGet restore
+# is cached as long as no package or project references change.
+COPY src/DMS.API/DMS.API.csproj       src/DMS.API/
+COPY src/DMS.BLL/DMS.BLL.csproj       src/DMS.BLL/
+COPY src/DMS.DAL/DMS.DAL.csproj       src/DMS.DAL/
+COPY src/DMS.Domain/DMS.Domain.csproj src/DMS.Domain/
+
+RUN dotnet restore src/DMS.API/DMS.API.csproj
+
+# Now copy the remaining source code and publish it
+# (Unit tests are not needed for the image)
+COPY src/DMS.API/    src/DMS.API/
+COPY src/DMS.BLL/    src/DMS.BLL/
+COPY src/DMS.DAL/    src/DMS.DAL/
+COPY src/DMS.Domain/ src/DMS.Domain/
+
+RUN dotnet publish src/DMS.API/DMS.API.csproj -c Release -o /app/publish --no-restore
+
+# ---------- Runtime stage ----------
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+
+# Run as a non-root user
+USER $APP_UID
+
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "DMS.API.dll"]
