@@ -63,6 +63,8 @@ Membership IDs have private setters and are supplied through a constructor.
 
 ### Current Verification
 The initial solution builds successfully.
+- Manually verified GET /health returns HTTP 200 OK with body "Healthy".
+- 
 No meaningful automated tests have been implemented yet.
 
 ## Time Tracking
@@ -70,7 +72,8 @@ Record actual time spent by each team member.
 Keep estimates separate from actual time.
 
 | Date | Team Member | Task | Actual Duration | Result / Commit |
-| 2026-09-20 | Michael | Installed VS 2026, created layered projects and references, added initial documentation | ~1 h 30 min | Solution builds; commit pending |
+| 2026-09-20 | Michael | Installed VS 2026, created layered projects and references, added initial documentation | ~1 h 30 min | Solution builds; commited |
+| 2026-09-21 | Michael | Created API health endpoint | ~10 min | returns Healthy |
 
 ## Planned Technologies
 These technologies are planned but are not yet integrated:
