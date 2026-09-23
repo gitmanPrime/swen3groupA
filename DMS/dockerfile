@@ -28,6 +28,10 @@ RUN dotnet publish src/DMS.API/DMS.API.csproj -c Release -o /app/publish --no-re
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+# Directory for application file storage
+RUN mkdir -p /app/App_Data/files \
+    && chown -R $APP_UID:$APP_UID /app/App_Data
+
 # Run as a non-root user
 USER $APP_UID
 

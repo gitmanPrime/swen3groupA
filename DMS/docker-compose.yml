@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:18
     environment:
-      POSTGRES_DB: paperless
-      POSTGRES_USER: paperless
-      POSTGRES_PASSWORD: paperless
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -12,7 +12,7 @@ services:
       # (nicht mehr auf /var/lib/postgresql/data)
       - pgdata:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U paperless -d paperless"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -27,7 +27,10 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      ConnectionStrings__Postgres: "Host=postgres;Database=paperless;Username=paperless;Password=paperless"
+      ConnectionStrings__Postgres: "Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    volumes:
+      - dms_data:/app/App_Data
 
 volumes:
   pgdata:
+  dms_data:

@@ -1,6 +1,42 @@
 @DMS.API_HostAddress = http://localhost:5000
 
-GET {{DMS.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### Health check
+GET {{DMS.API_HostAddress}}/health
 
-###
+### Create a collection
+POST {{DMS.API_HostAddress}}/api/collections
+Content-Type: application/json
+
+{
+  "name": "Invoices",
+  "description": "All incoming invoices"
+}
+
+### List collections
+GET {{DMS.API_HostAddress}}/api/collections
+
+### Create a tag
+POST {{DMS.API_HostAddress}}/api/tags
+Content-Type: application/json
+
+{
+  "name": "important"
+}
+
+### List tags
+GET {{DMS.API_HostAddress}}/api/tags
+
+### Upload a document (multipart/form-data)
+POST {{DMS.API_HostAddress}}/api/documents
+Content-Type: multipart/form-data; boundary=----dms
+
+------dms
+Content-Disposition: form-data; name="file"; filename="example.txt"
+Content-Type: text/plain
+
+Hello from DMS!
+------dms
+Content-Disposition: form-data; name="description"
+
+Example document
+------dms--
