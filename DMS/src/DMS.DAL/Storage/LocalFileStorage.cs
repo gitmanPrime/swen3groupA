@@ -46,7 +46,7 @@ public class LocalFileStorage : IFileStorage
 
     public Task DeleteAsync(string key, CancellationToken cancellationToken = default)
     {
-        var fullPath = GetFullPath(key);
+        File.Delete(GetFullPath(key));
         return Task.CompletedTask;
     }
 
