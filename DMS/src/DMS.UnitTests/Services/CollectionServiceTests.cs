@@ -1,6 +1,8 @@
+using AutoMapper;
 using DMS.BLL.Dtos;
 using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
+using DMS.BLL.Mapping;
 using DMS.BLL.Services;
 using DMS.Domain.Entities;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -11,8 +13,15 @@ namespace DMS.UnitTests.Services;
 public class CollectionServiceTests
 {
     private readonly Mock<ICollectionRepository> _collections = new();
+    private static IMapper CreateMapper()
+    {
+        var config = new MapperConfiguration(
+            cfg => cfg.AddProfile<MappingProfile>(),
+            NullLoggerFactory.Instance);
+        return config.CreateMapper();
+    }
 
-    private CollectionService CreateSut() => new(_collections.Object, NullLogger<CollectionService>.Instance);
+    private CollectionService CreateSut() => new(_collections.Object, CreateMapper(), NullLogger<CollectionService>.Instance);
 
     // ---------- Create ----------
 
