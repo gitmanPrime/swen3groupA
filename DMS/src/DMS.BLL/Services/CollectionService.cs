@@ -1,3 +1,4 @@
+using AutoMapper;
 using DMS.BLL.Dtos;
 using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
@@ -12,12 +13,14 @@ public class CollectionService : ICollectionService
     private const int MaxNameLength = 128;
 
     private readonly ICollectionRepository _collections;
+    private readonly IMapper _mapper;
     private readonly ILogger<CollectionService> _logger;
 
-    public CollectionService(ICollectionRepository collections, ILogger<CollectionService> logger)
+    public CollectionService(ICollectionRepository collections, IMapper mapper, ILogger<CollectionService> logger)
     {
         _collections = collections;
-        _logger = logger;
+        _mapper = mapper;
+        _logger = logger; 
     }
 
     // create a collection
@@ -104,5 +107,9 @@ public class CollectionService : ICollectionService
         return trimmed.Length == 0 ? null : trimmed;
     }
 
-    private static CollectionDto ToDto(Collection collection, int documentCount) => new(collection.Id, collection.Name, collection.Description, collection.CreatedAt, documentCount);
+    private CollectionDto ToDto(Collection collection, int documentCount)
+    {
+        var dto = _mapper.Map<CollectionDto>(collection);
+        return dto with { DocumentCount = documentCount };
+    }
 }

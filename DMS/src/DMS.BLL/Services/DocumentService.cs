@@ -1,3 +1,4 @@
+using AutoMapper;
 using DMS.BLL.Dtos;
 using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
@@ -16,14 +17,16 @@ public class DocumentService : IDocumentService
     private readonly ICollectionRepository _collections;
     private readonly ITagRepository _tags;
     private readonly IFileStorage _storage;
+    private readonly IMapper _mapper;
     private readonly ILogger<DocumentService> _logger;
 
-    public DocumentService(IDocumentRepository documents, ICollectionRepository collections, ITagRepository tags, IFileStorage storage, ILogger<DocumentService> logger)
+    public DocumentService(IDocumentRepository documents, ICollectionRepository collections, ITagRepository tags, IFileStorage storage, IMapper mapper, ILogger<DocumentService> logger)
     {
         _documents = documents;
         _collections = collections;
         _tags = tags;
         _storage = storage;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -200,14 +203,5 @@ public class DocumentService : IDocumentService
         return trimmed.Length == 0 ? null : trimmed;
     }
 
-    private static DocumentDto ToDto(Document document) => new(
-        document.Id,
-        document.FileName,
-        document.ContentType,
-        document.FileSize,
-        document.UploadedAt,
-        document.Description,
-        document.Status,
-        document.DocumentCollections.Select(dc => dc.CollectionId).ToList(),
-        document.DocumentTags.Select(dt => dt.TagId).ToList());
+    private DocumentDto ToDto(Document document) => _mapper.Map<DocumentDto>(document);
 }
