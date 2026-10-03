@@ -52,6 +52,35 @@ The pair (DocumentId, CollectionId) will be the composite primary key,
 preventing the same document from appearing twice in one collection.
 Membership IDs have private setters and are supplied through a constructor.
 
+### ADR-007: Onion Architecture
+
+We structure the solution following the Onion Architecture pattern. 
+Dependencies point strictly inward: outer layers depend on inner layers, 
+never the reverse.
+
+```mermaid
+graph TD
+    A[DMS.API<br/>Controllers, DI config] --> B[DMS.BLL<br/>Services, DTOs, Mapping]
+    B --> C[DMS.Domain<br/>Entities, core business rules]
+    D[DMS.DAL<br/>EF Core, Repositories] --> B
+    D --> C
+```
+
+- **DMS.Domain** (center): Contains entities and core business rules with no 
+  dependencies on any other layer or external framework.
+- **DMS.BLL**: Contains application services, use cases, DTOs, mapping profiles, 
+  and repository interfaces. Depends only on Domain.
+- **DMS.DAL**: Implements the repository interfaces defined in BLL using EF Core. 
+  Depends on BLL and Domain, but BLL/Domain have no knowledge of EF Core or 
+  PostgreSQL specifics.
+- **DMS.API** (outermost): Exposes HTTP endpoints, wires up dependency injection, 
+  and translates between HTTP and the application layer.
+
+This keeps the domain and business logic independent of infrastructure concerns 
+(database, web framework), making them easier to test and allowing infrastructure 
+components (e.g. the file storage backend) to be swapped without touching business 
+logic — relevant later in Sprint 4 when local file storage is replaced by MinIO.
+
 ## Progress
 - Created the layered solution and unit test project.
 - Added project references.
@@ -60,6 +89,16 @@ Membership IDs have private setters and are supplied through a constructor.
 - Added API health endpoint (GET /health returns "Healthy").
 - Sprint 1: implemented domain model, EF Core + Npgsql persistence, repositories,
   business services, REST API with Swagger UI, local file storage and unit tests.
+
+## Versioning
+
+We tag the repository after each sprint submission using semantic versioning 
+(`vMAJOR.MINOR.0`), e.g. `v0.1.0` for Sprint 1. Tags mark the exact code state 
+submitted for grading.
+
+| Tag | Sprint | Description |
+|-----|--------|-------------|
+| v0.1.0 | Sprint 1 | REST API, EF Core persistence, repository pattern, AutoMapper |
 
 ### Technology versions (introduced in Sprint 1)
 - .NET 10 SDK 10.0.401, target framework net10.0.
