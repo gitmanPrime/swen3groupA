@@ -1,4 +1,5 @@
 using DMS.BLL.Interfaces.Services;
+using DMS.BLL.Mapping;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.BLL;
@@ -11,6 +12,7 @@ public static class DependencyInjection
         services.AddScoped<IDocumentService, Services.DocumentService>();
         services.AddScoped<ICollectionService, Services.CollectionService>();
         services.AddScoped<ITagService, Services.TagService>();
+        services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
         return services;
     }
 }

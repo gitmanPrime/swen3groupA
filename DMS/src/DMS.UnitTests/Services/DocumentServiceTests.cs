@@ -1,7 +1,9 @@
+using AutoMapper;
 using DMS.BLL.Dtos;
 using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
 using DMS.BLL.Interfaces.Storage;
+using DMS.BLL.Mapping;
 using DMS.BLL.Services;
 using DMS.Domain.Entities;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -15,12 +17,18 @@ public class DocumentServiceTests
     private readonly Mock<ICollectionRepository> _collections = new();
     private readonly Mock<ITagRepository> _tags = new();
     private readonly Mock<IFileStorage> _storage = new();
+    private static IMapper CreateMapper()
+    {
+        var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>(), NullLoggerFactory.Instance);
+        return config.CreateMapper();
+    }
 
     private DocumentService CreateSut() => new(
         _documents.Object,
         _collections.Object,
         _tags.Object,
         _storage.Object,
+        CreateMapper(),
         NullLogger<DocumentService>.Instance);
 
     private static MemoryStream Content(string text = "hello") => new(System.Text.Encoding.UTF8.GetBytes(text));
