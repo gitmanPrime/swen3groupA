@@ -28,8 +28,86 @@
   ],
   "item": [
     {
-      "name": "Documents",
+      "name": "Setup",
       "item": [
+        {
+          "name": "Create collection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invoices\",\n  \"description\": \"All invoices\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/collections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "collections"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"collectionId\", pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"important\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tags"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"tagId\", pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "Upload document",
           "request": {
@@ -38,17 +116,48 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "file", "type": "file", "src": [] },
-                { "key": "description", "value": "Test document for Sprint 1", "type": "text" }
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "description",
+                  "value": "Test document for Sprint 1",
+                  "type": "text"
+                }
               ]
             },
             "url": {
               "raw": "{{baseUrl}}/api/documents",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents"
+              ]
             }
-          }
-        },
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"documentId\", pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
         {
           "name": "List documents",
           "request": {
@@ -56,8 +165,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/documents",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents"
+              ]
             }
           }
         },
@@ -68,11 +182,22 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/documents?collectionId={{collectionId}}&tagId={{tagId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents"
+              ],
               "query": [
-                { "key": "collectionId", "value": "{{collectionId}}" },
-                { "key": "tagId", "value": "{{tagId}}" }
+                {
+                  "key": "collectionId",
+                  "value": "{{collectionId}}"
+                },
+                {
+                  "key": "tagId",
+                  "value": "{{tagId}}"
+                }
               ]
             }
           }
@@ -84,8 +209,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/documents/{{documentId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents", "{{documentId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}"
+              ]
             }
           }
         },
@@ -96,8 +227,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/documents/{{documentId}}/download",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents", "{{documentId}}", "download"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}",
+                "download"
+              ]
             }
           }
         },
@@ -106,7 +244,10 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -114,20 +255,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/documents/{{documentId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents", "{{documentId}}"]
-            }
-          }
-        },
-        {
-          "name": "Delete document",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/documents/{{documentId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents", "{{documentId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}"
+              ]
             }
           }
         },
@@ -138,8 +273,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/documents/{{documentId}}/tags/{{tagId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents", "{{documentId}}", "tags", "{{tagId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}",
+                "tags",
+                "{{tagId}}"
+              ]
             }
           }
         },
@@ -150,8 +293,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/documents/{{documentId}}/tags/{{tagId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "documents", "{{documentId}}", "tags", "{{tagId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}",
+                "tags",
+                "{{tagId}}"
+              ]
             }
           }
         }
@@ -161,32 +312,19 @@
       "name": "Collections",
       "item": [
         {
-          "name": "Create collection",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Invoices\",\n  \"description\": \"All invoices\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/collections",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collections"]
-            }
-          }
-        },
-        {
           "name": "List collections",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/collections",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collections"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "collections"
+              ]
             }
           }
         },
@@ -197,8 +335,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/collections/{{collectionId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collections", "{{collectionId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "collections",
+                "{{collectionId}}"
+              ]
             }
           }
         },
@@ -207,7 +351,10 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -215,8 +362,59 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/collections/{{collectionId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collections", "{{collectionId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "collections",
+                "{{collectionId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tags",
+      "item": [
+        {
+          "name": "List tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tags"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Delete document",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/{{documentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}"
+              ]
             }
           }
         },
@@ -227,43 +425,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/collections/{{collectionId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collections", "{{collectionId}}"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Tags",
-      "item": [
-        {
-          "name": "Create tag",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"important\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/tags",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "tags"]
-            }
-          }
-        },
-        {
-          "name": "List tags",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/tags",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "tags"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "collections",
+                "{{collectionId}}"
+              ]
             }
           }
         }
