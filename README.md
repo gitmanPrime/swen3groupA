@@ -57,17 +57,6 @@ We structure the solution following the Onion Architecture pattern.
 Dependencies point strictly inward: outer layers depend on inner layers, 
 never the reverse.
 
-### ADR-008: Angular frontend
-The frontend is a separate Angular application in `DMS/frontend`.
-It uses standalone components, Angular Router, and SCSS.
-
-Components are grouped into feature folders, with shared pages
-under `shared`. Route components are loaded lazily.
-
-This provides a common foundation for parallel frontend development.
-REST API integration and container deployment will follow.
-Whether authentication is required remains to be clarified.
-
 ```mermaid
 graph TD
     A[DMS.API<br/>Controllers, DI config] --> B[DMS.BLL<br/>Services, DTOs, Mapping]
@@ -90,6 +79,17 @@ This keeps the domain and business logic independent of infrastructure concerns
 (database, web framework), making them easier to test and allowing infrastructure 
 components (e.g. the file storage backend) to be swapped without touching business 
 logic — relevant later in Sprint 4 when local file storage is replaced by MinIO.
+
+### ADR-008: Angular frontend
+The frontend is a separate Angular application in `DMS/frontend`.
+It uses standalone components, Angular Router, and SCSS.
+
+Components are grouped into feature folders, with shared pages
+under `shared`. Route components are loaded lazily.
+
+This provides a common foundation for parallel frontend development.
+REST API integration and container deployment will follow.
+Whether authentication is required remains to be clarified.
 
 ## Progress
 - Created the layered solution and unit test project.
