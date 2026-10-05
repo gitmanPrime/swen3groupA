@@ -53,10 +53,20 @@ preventing the same document from appearing twice in one collection.
 Membership IDs have private setters and are supplied through a constructor.
 
 ### ADR-007: Onion Architecture
-
 We structure the solution following the Onion Architecture pattern. 
 Dependencies point strictly inward: outer layers depend on inner layers, 
 never the reverse.
+
+### ADR-008: Angular frontend
+The frontend is a separate Angular application in `DMS/frontend`.
+It uses standalone components, Angular Router, and SCSS.
+
+Components are grouped into feature folders, with shared pages
+under `shared`. Route components are loaded lazily.
+
+This provides a common foundation for parallel frontend development.
+REST API integration and container deployment will follow.
+Whether authentication is required remains to be clarified.
 
 ```mermaid
 graph TD
@@ -89,6 +99,11 @@ logic — relevant later in Sprint 4 when local file storage is replaced by MinI
 - Added API health endpoint (GET /health returns "Healthy").
 - Sprint 1: implemented domain model, EF Core + Npgsql persistence, repositories,
   business services, REST API with Swagger UI, local file storage and unit tests.
+- Sprint 2 preparation: added the Angular frontend scaffold,
+  application shell, dashboard placeholder, and fallback page.
+  Production build and component tests pass locally.
+- Frontend installation, development, build, and testing instructions
+  are available in [DMS/frontend/README.md](DMS/frontend/README.md).
 
 ## Versioning
 
@@ -116,12 +131,13 @@ submitted for grading.
 - Add a full user-story integration test in Sprint 6.
 - Achieve greater than 70% code coverage for code reviews.
 - Record test commands, results, and coverage scope as tests are implemented.
+- Use Vitest for Angular component tests.
+- Frontend CI runs dependency installation, production build,
+  and tests through GitHub Actions.
 
 ## Planned Technologies
 These technologies are planned but are not yet integrated:
 
-- EF Core and Npgsql for PostgreSQL persistence.
-- Docker Compose for running the API and supporting services.
 - RabbitMQ for asynchronous processing.
 - MinIO for document storage.
 - OCR tooling for extracting document text.
