@@ -1,59 +1,80 @@
-# DmsWeb
+# DMS Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+Angular frontend for the Document Management System.
 
-## Development server
+## Prerequisites
 
-To start a local development server, run:
+- Node.js 24.x
+- npm 11.x
 
-```bash
-ng serve
+Development setup verified with Node.js 24.14.0 and npm 11.9.0.
+Angular CLI is installed locally through the project dependencies.
+
+## Install dependencies
+
+From the repository root:
+
+```powershell
+Set-Location DMS/frontend
+npm ci
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+`npm ci` installs the versions recorded in `package-lock.json`.
+Commit the lockfile when changing dependencies.
 
-## Code scaffolding
+On Windows, use the directory casing `DMS` consistently.
+Running tests from a path containing `dms` caused an Angular
+injection-context error during setup.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Run locally
 
-```bash
-ng generate component component-name
+```powershell
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Open http://localhost:4200/.
+The development server reloads when source files change.
+Stop it with Ctrl+C.
 
-```bash
-ng generate --help
+The root URL redirects to `/documents`.
+Unknown URLs display the "Page not found" page.
+
+## Build
+
+```powershell
+npm run build
 ```
 
-## Building
+Build output is written to `dist/dms-web/`.
 
-To build the project run:
+## Run tests
 
-```bash
-ng build
+Run the tests once:
+
+```powershell
+npm test -- --watch=false
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Run tests in watch mode:
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+```powershell
+npm test
 ```
 
-## Running end-to-end tests
+## Project structure
 
-For end-to-end (e2e) testing, run:
+- `src/app/app.*`: application shell.
+- `src/app/app.config.ts`: application providers.
+- `src/app/app.routes.ts`: route definitions.
+- `src/app/features/`: components grouped by feature.
+- `src/app/shared/`: reusable components and shared pages.
+- `src/styles.scss`: global styles.
+- `public/`: static assets.
 
-```bash
-ng e2e
-```
+## Current scope
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+The initial setup includes the application shell, a dashboard
+placeholder, routing, and a fallback page.
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+REST API integration, document-management features, container
+deployment, and the authentication decision are pending.
