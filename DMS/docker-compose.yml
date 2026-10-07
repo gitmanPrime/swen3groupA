@@ -31,6 +31,15 @@ services:
     volumes:
       - dms_data:/app/App_Data
 
+  dms-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - dms-api
+
 volumes:
   pgdata:
   dms_data:
