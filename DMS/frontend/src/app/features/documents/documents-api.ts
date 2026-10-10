@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs/internal/Observable';
 
 export interface Document {
   id: string;
@@ -34,6 +35,10 @@ export class DocumentsApi {
 
   updateDescription(id: string, description: string) {
     return this.http.patch<Document>(`/api/documents/${encodeURIComponent(id)}`, { description });
+  }
+  
+  updateCollections(documentId: string, collectionIds: string[]): Observable<Document> {
+    return this.http.patch<Document>(`/api/documents/${documentId}`, { collectionIds });
   }
 
   delete(id: string) {
