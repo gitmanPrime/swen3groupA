@@ -35,7 +35,7 @@ describe('Dashboard', () => {
     request.flush([{ id: 'document-1', fileName: 'HelloWorld.pdf' }]);
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('HelloWorld.pdf');
-    expect(fixture.nativeElement.querySelector('li a').getAttribute('href'))
+    expect(fixture.nativeElement.querySelector('a[href*="/documents/"]').getAttribute('href'))
       .toBe('/documents/document-1');
     expect(fixture.nativeElement.textContent).not.toContain('Loading documents');
   });

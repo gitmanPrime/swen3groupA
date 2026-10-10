@@ -19,12 +19,17 @@ describe('Details', () => {
   it('loads and displays the selected document', async () => {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
+    
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1').flush({
       id: 'document-1', fileName: 'HelloWorld.pdf', description: 'Example document',
       contentType: 'application/pdf', fileSize: 123, uploadedAt: '2026-10-10T10:00:00Z',
       status: 'Uploaded', collectionIds: [], tagIds: [],
     });
+
+    TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
+
     await fixture.whenStable();
+    
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('HelloWorld.pdf');
     expect(text).toContain('Example document');
@@ -47,8 +52,12 @@ describe('Details', () => {
   async function loadedDetails() {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
+    
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1')
-      .flush({ id: 'document-1', fileName: 'example.pdf', description: 'Original' });
+      .flush({ id: 'document-1', fileName: 'example.pdf', description: 'Original', tagIds: [] });
+    
+    TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
+
     await fixture.whenStable();
     return fixture;
   }
