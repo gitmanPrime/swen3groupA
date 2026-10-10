@@ -1,6 +1,6 @@
 <div class="mb-6">
   <a routerLink="/documents" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors group">
-    <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform">
+    <svg xmlns="http://www.w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform">
       <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
     </svg>
     Back to overview
@@ -21,7 +21,7 @@
 
 @else if (error()) {
   <div role="alert" class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
-    <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5 text-red-600 flex-shrink-0">
+    <svg xmlns="http://www.w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5 text-red-600 flex-shrink-0">
       <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
     <div><span class="font-semibold">Couldn't load document:</span> {{ error() }}</div>
@@ -38,7 +38,7 @@
 
       <a [href]="'/api/documents/' + document.id + '/download'" download
          class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/10 hover:bg-blue-700 transition-all flex-shrink-0">
-        <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+        <svg xmlns="http://www.w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
         </svg>
         Download file
@@ -50,7 +50,7 @@
     <div class="lg:col-span-2 space-y-6">
       <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 text-slate-400">
+          <svg xmlns="http://www.w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 text-slate-400">
             <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 11.517 1.28l-.04.02-.041.02a.75.75 0 01-.517-1.28l.04-.02zM12 21a9 9 0 100-18 9 9 0 000 18z" />
           </svg>
           System information
@@ -64,10 +64,6 @@
 
           <div class="space-y-1">
             <dt class="font-medium text-slate-400">Status</dt>
-            <!--
-              NgClass picks one full class string based on the status, instead of
-              several chained [class.x] bindings (which don't compose this way).
-            -->
             <dd
               class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ring-1 ring-inset"
               [ngClass]="document.status === 'PROCESSED'
@@ -131,14 +127,15 @@
       </div>
     </div>
 
+    <!-- Right Sidebar -->
     <div class="space-y-6">
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sticky top-24">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 class="text-base font-bold text-slate-900 mb-4">Edit description</h3>
 
         <form (submit)="saveDescription($event, description.value)" class="space-y-4">
           <div class="space-y-2">
             <label for="description" class="sr-only">Description</label>
-            <textarea #description id="description" rows="6"
+            <textarea #description id="description" rows="4"
                       [value]="document.description ?? ''"
                       [disabled]="busy()"
                       placeholder="Enter a description…"
@@ -147,36 +144,83 @@
 
           <button type="submit" [disabled]="busy()"
                   class="w-full inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            @if (busy()) {
-              Saving…
-            } @else {
-              Save changes
-            }
+            @if (busy()) { Saving… } @else { Save changes }
           </button>
         </form>
 
         <div class="mt-4 space-y-3">
           @if (success()) {
             <div role="status" class="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-800 shadow-sm">
-              <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-4 w-4 text-emerald-600 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
               <div>{{ success() }}</div>
             </div>
           }
 
           @if (actionError()) {
-            <div
-              role="alert"
-              class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-medium text-red-800 shadow-sm"
-            >
+            <div role="alert" class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-medium text-red-800 shadow-sm">
               <div>{{ actionError() }}</div>
             </div>
           }
         </div>
       </div>
 
-      <app-document-tags [documentId]="document.id" [tagIds]="document.tagIds" />
+      <!-- Tags Component mit explizitem Abstand oben -->
+      <div class="mt-6">
+        <app-document-tags [documentId]="document.id" [tagIds]="document.tagIds" />
+      </div>
+
+      <!-- Collections Overview mit explizitem Abstand oben -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm mt-6">
+        <h3 class="text-base font-bold text-slate-900 mb-3">Collections</h3>
+        <p class="text-xs text-slate-500 mb-4">Manage the collections this document belongs to.</p>
+
+        <div class="flex gap-2 mb-4">
+          <select 
+            [ngModel]="selectedCollectionId()" 
+            (ngModelChange)="selectedCollectionId.set($event)"
+            class="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+            <option value="">Select a collection...</option>
+            @for (col of allCollections(); track col.id) {
+              <option [value]="col.id">{{ col.name }}</option>
+            }
+          </select>
+          <button 
+            type="button" 
+            (click)="addToCollection()"
+            [disabled]="!selectedCollectionId() || busy()"
+            class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-all">
+            Add
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          @if (document.collectionIds && document.collectionIds.length > 0) {
+            <p class="text-xs font-semibold text-slate-700 mb-2">Assigned collections:</p>
+            <div class="space-y-1.5">
+              @for (colId of document.collectionIds; track colId) {
+                <div class="flex items-center justify-between p-2 rounded-xl border border-blue-100 bg-blue-50/50 text-xs text-blue-900">
+                  <span class="font-medium truncate">
+                    @for (c of allCollections(); track c.id) {
+                      @if (c.id === colId) { {{ c.name }} }
+                    }
+                  </span>
+                  <button 
+                    type="button" 
+                    (click)="removeFromCollection(colId)"
+                    [disabled]="busy()"
+                    class="text-blue-600 hover:text-red-600 font-bold px-1 transition-colors"
+                    title="Remove from collection">
+                    ✕
+                  </button>
+                </div>
+              }
+            </div>
+          } @else if (allCollections().length === 0) {
+            <p class="text-xs text-slate-400 italic">No collections available yet.</p>
+          } @else {
+            <p class="text-xs text-slate-400 italic">Not assigned to any collection yet.</p>
+          }
+        </div>
+      </div>
     </div>
   </div>
 }
