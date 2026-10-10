@@ -35,7 +35,7 @@ describe('Dashboard', () => {
     request.flush([{ id: 'document-1', fileName: 'HelloWorld.pdf' }]);
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('HelloWorld.pdf');
-    expect(fixture.nativeElement.querySelector('a[href*="/documents/"]').getAttribute('href'))
+    expect(fixture.nativeElement.querySelector('a[href="/documents/document-1"]').getAttribute('href'))
       .toBe('/documents/document-1');
     expect(fixture.nativeElement.textContent).not.toContain('Loading documents');
   });
@@ -50,6 +50,6 @@ describe('Dashboard', () => {
   it('displays an empty state when there are no documents', async () => {
     http.expectOne('/api/documents').flush([]);
     await fixture.whenStable();
-    expect(fixture.nativeElement.textContent).toContain('No documents yet.');
+    expect(fixture.nativeElement.textContent).toContain('No documents yet');
   });
 });

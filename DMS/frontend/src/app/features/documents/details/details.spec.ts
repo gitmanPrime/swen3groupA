@@ -20,12 +20,17 @@ describe('Details', () => {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
     
+    // 1. Dokument-Request beantworten
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1').flush({
       id: 'document-1', fileName: 'HelloWorld.pdf', description: 'Example document',
       contentType: 'application/pdf', fileSize: 123, uploadedAt: '2026-10-10T10:00:00Z',
       status: 'Uploaded', collectionIds: [], tagIds: [],
     });
 
+    // Warten, bis das Dokument gerendert ist und die Tag-Komponente den Request auslöst
+    await fixture.whenStable();
+
+    // 2. Tag-Request abfangen
     TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
 
     await fixture.whenStable();
@@ -56,6 +61,8 @@ describe('Details', () => {
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1')
       .flush({ id: 'document-1', fileName: 'example.pdf', description: 'Original', tagIds: [] });
     
+    await fixture.whenStable();
+
     TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
 
     await fixture.whenStable();
