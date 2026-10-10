@@ -28,6 +28,7 @@
     {
       "username": "student",
       "enabled": true,
+      "realmRoles": [ "default-roles-dms" ],
       "email": "student@example.com",
       "firstName": "Test",
       "lastName": "User",
