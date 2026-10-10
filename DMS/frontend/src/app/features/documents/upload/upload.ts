@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DocumentsApi } from '../documents-api';
 
+/** Upload form for adding a new PDF document to the archive. */
 @Component({
   selector: 'app-document-upload',
   imports: [RouterLink],
@@ -18,6 +19,10 @@ export class Upload {
     if (this.uploading()) return;
     this.error.set('');
     this.success.set('');
+
+    // Client-side validation: must be a non-empty PDF. The REST API still
+    // re-validates this server-side, this just avoids an unnecessary
+    // round trip for an obviously invalid file.
     const file = fileInput.files?.[0];
     if (!file || !file.name.toLowerCase().endsWith('.pdf') ||
         (file.type && file.type !== 'application/pdf') || file.size === 0) {
