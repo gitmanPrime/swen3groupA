@@ -1,21 +1,79 @@
-<a routerLink="/documents">Back to documents</a>
-<h2>Upload PDF</h2>
-<form (submit)="upload($event, file, description.value)">
-  <fieldset [disabled]="uploading()">
-    <p>
-      <label for="file">PDF file</label>
-      <input #file id="file" type="file" accept=".pdf,application/pdf" />
-    </p>
-    <p>
-      <label for="description">Description (optional)</label>
-      <textarea #description id="description"></textarea>
-    </p>
-    <button type="submit">{{ uploading() ? 'Uploading...' : 'Upload' }}</button>
+<div class="mb-6">
+  <a routerLink="/documents" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors group">
+    <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+    </svg>
+    Back to overview
+  </a>
+</div>
+
+<div class="mb-8">
+  <h2 class="text-2xl font-bold tracking-tight text-slate-900">Upload a new document</h2>
+  <p class="text-sm text-slate-500">Add a new PDF file to your document management system.</p>
+</div>
+
+<form (submit)="upload($event, file, description.value)" class="max-w-2xl space-y-6">
+  <!-- Disable the whole form while an upload is in progress -->
+  <fieldset [disabled]="uploading()" class="space-y-6 disabled:opacity-60 disabled:cursor-not-allowed">
+
+    <div class="space-y-2">
+      <label for="file" class="block text-sm font-semibold text-slate-700">PDF document</label>
+
+      <div class="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center hover:bg-slate-100/50 hover:border-blue-400 transition-all group cursor-pointer">
+        <!-- Transparent file input stretched over the dropzone so the whole area is clickable -->
+        <input #file id="file" type="file" accept=".pdf,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+
+        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm border border-slate-200 group-hover:text-blue-600 transition-colors">
+          <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+          </svg>
+        </div>
+
+        <p class="text-sm font-medium text-slate-700">
+          <span class="text-blue-600 hover:underline">Choose a file</span> or drag it here
+        </p>
+        <p class="mt-1 text-xs text-slate-500">PDF files only</p>
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <label for="description" class="block text-sm font-semibold text-slate-700">Description <span class="text-xs font-normal text-slate-400">(optional)</span></label>
+      <textarea #description id="description" rows="4" placeholder="Short description of the document…" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-y"></textarea>
+    </div>
+
+    <div class="pt-2">
+      <button type="submit" class="w-full sm:w-auto inline-flex min-w-[140px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/10 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed transition-all">
+        @if (uploading()) {
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Uploading…
+        } @else {
+          Upload document
+        }
+      </button>
+    </div>
+
   </fieldset>
 </form>
-@if (error()) {
-  <p role="alert">{{ error() }}</p>
-}
-@if (success()) {
-  <p role="status">{{ success() }}</p>
-}
+
+<div class="mt-6 max-w-2xl">
+  @if (error()) {
+    <div role="alert" class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
+      <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5 text-red-600 flex-shrink-0">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+      <div>{{ error() }}</div>
+    </div>
+  }
+
+  @if (success()) {
+    <div role="status" class="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 shadow-sm">
+      <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5 text-emerald-600 flex-shrink-0">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+      <div>{{ success() }}</div>
+    </div>
+  }
+</div>
