@@ -6,7 +6,7 @@
 } @else {
   <ul>
     @for (document of documents(); track document.id) {
-      <li>{{ document.fileName }}</li>
+      <li><a [routerLink]="['/documents', document.id]">{{ document.fileName }}</a></li>
     } @empty {
       <li>No documents yet.</li>
     }

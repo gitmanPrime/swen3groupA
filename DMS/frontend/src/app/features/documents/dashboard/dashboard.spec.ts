@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 
 import { Dashboard } from './dashboard';
 
@@ -12,7 +13,7 @@ describe('Dashboard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Dashboard],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Dashboard);
@@ -34,6 +35,8 @@ describe('Dashboard', () => {
     request.flush([{ id: 'document-1', fileName: 'HelloWorld.pdf' }]);
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('HelloWorld.pdf');
+    expect(fixture.nativeElement.querySelector('li a').getAttribute('href'))
+      .toBe('/documents/document-1');
     expect(fixture.nativeElement.textContent).not.toContain('Loading documents');
   });
 

@@ -79,7 +79,8 @@ npm test
 ## Current scope
 
 The frontend includes the application shell, routing, a fallback page,
-and a basic document list loaded from the REST API with loading and error messages.
+and a document list loaded from the REST API with loading and error messages.
+Select a filename to open its read-only metadata page at `/documents/:id`.
 
 Upload, document details/editing, tags, collections, and authentication
 are separate follow-up tasks.

@@ -1,0 +1,16 @@
+<a routerLink="/documents">Back to documents</a>
+<h2>Document details</h2>
+@if (loading()) {
+  <p>Loading document...</p>
+} @else if (error()) {
+  <p role="alert">{{ error() }}</p>
+} @else if (document(); as document) {
+  <dl>
+    <dt>File name</dt><dd>{{ document.fileName }}</dd>
+    <dt>Description</dt><dd>{{ document.description || 'No description.' }}</dd>
+    <dt>Content type</dt><dd>{{ document.contentType }}</dd>
+    <dt>Size</dt><dd>{{ document.fileSize }} bytes</dd>
+    <dt>Uploaded</dt><dd>{{ document.uploadedAt | date:'medium' }}</dd>
+    <dt>Status</dt><dd>{{ document.status }}</dd>
+  </dl>
+}

@@ -14,6 +14,11 @@ export const routes: Routes = [
 
   },
   {
+    path: 'documents/:id',
+    loadComponent: () =>
+      import('./features/documents/details/details').then(component => component.Details)
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./shared/pages/not-found/not-found')

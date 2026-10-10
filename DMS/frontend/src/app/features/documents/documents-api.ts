@@ -20,4 +20,8 @@ export class DocumentsApi {
   list() {
     return this.http.get<Document[]>('/api/documents');
   }
+
+  getById(id: string) {
+    return this.http.get<Document>(`/api/documents/${encodeURIComponent(id)}`);
+  }
 }
