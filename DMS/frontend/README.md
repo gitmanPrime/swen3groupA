@@ -41,6 +41,7 @@ Start the backend from the repository root before loading the document dashboard
 
 ```powershell
 docker compose -f DMS/docker-compose.yml up -d --build dms-api
+```
 
 The root URL redirects to `/documents`.
 Unknown URLs display the "Page not found" page.
