@@ -1,17 +1,23 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Document, DocumentsApi } from '../documents-api';
+import { DocumentTags } from '../document-tags/document-tags';
 
+/**
+ * Detail page for a single document: shows its metadata, lets the user
+ * edit its description, manage its tags, or delete it.
+ */
 @Component({
   selector: 'app-document-details',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, NgClass, RouterLink, DocumentTags],
   templateUrl: './details.html',
 })
 export class Details implements OnInit {
   private readonly api = inject(DocumentsApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
   readonly document = signal<Document | null>(null);
   readonly loading = signal(true);
   readonly error = signal('');
@@ -21,6 +27,7 @@ export class Details implements OnInit {
   readonly confirmingDelete = signal(false);
 
   ngOnInit() {
+    // The document id comes from the route (/documents/:id).
     this.api.getById(this.route.snapshot.paramMap.get('id')!).subscribe({
       next: (document) => {
         this.document.set(document);
@@ -66,5 +73,14 @@ export class Details implements OnInit {
         this.busy.set(false);
       },
     });
+  }
+
+  // formats a byte count as a short, human-readable size (e.g. "1.4 MB")
+  formatBytes(bytes: number): string {
+    if (!bytes || bytes <= 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const value = bytes / Math.pow(1024, exponent);
+    return `${exponent === 0 ? value : value.toFixed(1)} ${units[exponent]}`;
   }
 }

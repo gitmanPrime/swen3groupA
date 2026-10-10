@@ -1,7 +1,56 @@
-<header>
-  <h1>Document Management System</h1>
-</header>
+<div class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+  <!-- Top navigation bar, stays visible while scrolling -->
+  <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <a routerLink="/documents" class="flex items-center gap-3 group">
+        <!--
+          Custom "stacked pages" mark as logo: three offset sheets hint at an
+          archive of documents rather than one flat glyph.
+        -->
+        <svg viewBox="0 0 36 36" class="h-9 w-9 flex-shrink-0" aria-hidden="true">
+          <rect x="10" y="4" width="20" height="24" rx="2.5" class="fill-slate-200" />
+          <rect x="6" y="8" width="20" height="24" rx="2.5" class="fill-blue-100 stroke-blue-300" stroke-width="1" />
+          <rect x="2" y="12" width="20" height="24" rx="2.5" class="fill-white stroke-blue-600" stroke-width="1.5" />
+          <path d="M6.5 18h12M6.5 23h12M6.5 28h7" class="stroke-blue-600" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
 
-<main>
-  <router-outlet />
-</main>
+        <div class="leading-tight">
+          <div class="flex items-baseline gap-2">
+            <span class="font-mono text-sm font-semibold tracking-tight text-blue-600">DMS</span>
+            <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+            <span class="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">Document Management System</span>
+          </div>
+          <p class="text-xs text-slate-400">Archive, tag and find your documents</p>
+        </div>
+      </a>
+
+      <!-- Primary navigation -->
+      <nav class="flex items-center gap-1">
+        <a
+          routerLink="/documents"
+          routerLinkActive="bg-slate-100 text-slate-900"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+        >
+          Documents
+        </a>
+        <a
+          routerLink="/documents/upload"
+          routerLinkActive="bg-slate-100 text-slate-900"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+        >
+          Upload
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!--
+    Page content is rendered directly, without an extra wrapper card:
+    each routed page (dashboard, details, upload) builds its own
+    card(s), so an outer card here would just nest boxes inside boxes.
+  -->
+  <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+    <router-outlet />
+  </main>
+</div>

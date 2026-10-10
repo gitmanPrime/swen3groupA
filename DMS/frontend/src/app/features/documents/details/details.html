@@ -1,37 +1,182 @@
-<a routerLink="/documents">Back to documents</a>
-<h2>Document details</h2>
+<div class="mb-6">
+  <a routerLink="/documents" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors group">
+    <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+    </svg>
+    Back to overview
+  </a>
+</div>
+
+<!-- Skeleton placeholder shown while the document is loading -->
 @if (loading()) {
-  <p>Loading document...</p>
-} @else if (error()) {
-  <p role="alert">{{ error() }}</p>
-} @else if (document(); as document) {
-  <dl>
-    <dt>File name</dt><dd>{{ document.fileName }}</dd>
-    <dt>Description</dt><dd>{{ document.description || 'No description.' }}</dd>
-    <dt>Content type</dt><dd>{{ document.contentType }}</dd>
-    <dt>Size</dt><dd>{{ document.fileSize }} bytes</dd>
-    <dt>Uploaded</dt><dd>{{ document.uploadedAt | date:'medium' }}</dd>
-    <dt>Status</dt><dd>{{ document.status }}</dd>
-  </dl>
-  <a [href]="'/api/documents/' + document.id + '/download'" download>Download document</a>
-  <form (submit)="saveDescription($event, description.value)">
-    <p>
-      <label for="description">Description</label>
-      <textarea #description id="description" [value]="document.description ?? ''" [disabled]="busy()"></textarea>
-    </p>
-    <button type="submit" [disabled]="busy()">Save description</button>
-  </form>
-  @if (success()) {
-    <p role="status">{{ success() }}</p>
-  }
-  @if (actionError()) {
-    <p role="alert">{{ actionError() }}</p>
-  }
-  @if (confirmingDelete()) {
-    <p>Delete {{ document.fileName }}? This also removes its stored file.</p>
-    <button type="button" [disabled]="busy()" (click)="deleteDocument()">Confirm deletion</button>
-    <button type="button" [disabled]="busy()" (click)="confirmingDelete.set(false)">Cancel</button>
-  } @else {
-    <button type="button" [disabled]="busy()" (click)="confirmingDelete.set(true)">Delete document</button>
-  }
+  <div class="animate-pulse space-y-4">
+    <div class="h-8 w-64 bg-slate-200 rounded-lg"></div>
+    <div class="h-4 w-48 bg-slate-200 rounded-lg"></div>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 mt-8">
+      <div class="h-64 bg-slate-200 rounded-2xl lg:col-span-2"></div>
+      <div class="h-48 bg-slate-200 rounded-2xl"></div>
+    </div>
+  </div>
+}
+
+@else if (error()) {
+  <div role="alert" class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
+    <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5 text-red-600 flex-shrink-0">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+    <div><span class="font-semibold">Couldn't load document:</span> {{ error() }}</div>
+  </div>
+}
+
+@else if (document(); as document) {
+  <div class="mb-8 border-b border-slate-100 pb-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h2 class="text-2xl font-bold tracking-tight text-slate-900 truncate max-w-xl">{{ document.fileName }}</h2>
+        <p class="text-sm text-slate-500 mt-1">Details and metadata for this document</p>
+      </div>
+
+      <a [href]="'/api/documents/' + document.id + '/download'" download
+         class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/10 hover:bg-blue-700 transition-all flex-shrink-0">
+        <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        Download file
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 text-slate-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 11.517 1.28l-.04.02-.041.02a.75.75 0 01-.517-1.28l.04-.02zM12 21a9 9 0 100-18 9 9 0 000 18z" />
+          </svg>
+          System information
+        </h3>
+
+        <dl class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 text-sm border-t border-slate-100 pt-4">
+          <div class="space-y-1">
+            <dt class="font-medium text-slate-400">File name</dt>
+            <dd class="text-slate-900 font-medium break-all">{{ document.fileName }}</dd>
+          </div>
+
+          <div class="space-y-1">
+            <dt class="font-medium text-slate-400">Status</dt>
+            <!--
+              NgClass picks one full class string based on the status, instead of
+              several chained [class.x] bindings (which don't compose this way).
+            -->
+            <dd
+              class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ring-1 ring-inset"
+              [ngClass]="document.status === 'PROCESSED'
+                ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+                : 'bg-amber-50 text-amber-700 ring-amber-600/20'"
+            >
+              <span
+                class="h-1.5 w-1.5 rounded-full"
+                [ngClass]="document.status === 'PROCESSED' ? 'bg-emerald-500' : 'bg-amber-500'"
+              ></span>
+              {{ document.status }}
+            </dd>
+          </div>
+
+          <div class="space-y-1">
+            <dt class="font-medium text-slate-400">File type</dt>
+            <dd class="text-slate-900 font-mono text-xs bg-slate-50 px-2 py-1 rounded border border-slate-200 inline-block">{{ document.contentType }}</dd>
+          </div>
+
+          <div class="space-y-1">
+            <dt class="font-medium text-slate-400">File size</dt>
+            <dd class="text-slate-900 font-mono text-xs">{{ formatBytes(document.fileSize) }}</dd>
+          </div>
+
+          <div class="space-y-1 sm:col-span-2">
+            <dt class="font-medium text-slate-400">Uploaded</dt>
+            <dd class="text-slate-900">{{ document.uploadedAt | date:'medium' }}</dd>
+          </div>
+
+          <div class="space-y-1 sm:col-span-2 border-t border-slate-100 pt-3 mt-1">
+            <dt class="font-medium text-slate-400">Current description</dt>
+            <dd class="text-slate-700 italic bg-slate-50/50 p-3 rounded-xl border border-slate-100">{{ document.description || 'No description provided.' }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="rounded-2xl border border-red-100 bg-red-50/30 p-6">
+        <h3 class="text-base font-bold text-red-900 mb-2">Danger zone</h3>
+        <p class="text-sm text-slate-500 mb-4">Deleting this document cannot be undone. The file is permanently removed from the server.</p>
+
+        @if (confirmingDelete()) {
+          <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 mb-4 text-sm text-red-900 space-y-3 animate-fade-in">
+            <p class="font-medium">Permanently delete "{{ document.fileName }}"? This can't be undone.</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" [disabled]="busy()" (click)="deleteDocument()"
+                      class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 transition-all disabled:opacity-50">
+                Yes, delete permanently
+              </button>
+              <button type="button" [disabled]="busy()" (click)="confirmingDelete.set(false)"
+                      class="inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50">
+                Cancel
+              </button>
+            </div>
+          </div>
+        } @else {
+          <button type="button" [disabled]="busy()" (click)="confirmingDelete.set(true)"
+                  class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-50 hover:border-red-300 transition-all disabled:opacity-50">
+            Delete document
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sticky top-24">
+        <h3 class="text-base font-bold text-slate-900 mb-4">Edit description</h3>
+
+        <form (submit)="saveDescription($event, description.value)" class="space-y-4">
+          <div class="space-y-2">
+            <label for="description" class="sr-only">Description</label>
+            <textarea #description id="description" rows="6"
+                      [value]="document.description ?? ''"
+                      [disabled]="busy()"
+                      placeholder="Enter a description…"
+                      class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-none disabled:bg-slate-50 disabled:text-slate-400"></textarea>
+          </div>
+
+          <button type="submit" [disabled]="busy()"
+                  class="w-full inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (busy()) {
+              Saving…
+            } @else {
+              Save changes
+            }
+          </button>
+        </form>
+
+        <div class="mt-4 space-y-3">
+          @if (success()) {
+            <div role="status" class="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-800 shadow-sm">
+              <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-4 w-4 text-emerald-600 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+              <div>{{ success() }}</div>
+            </div>
+          }
+
+          @if (actionError()) {
+            <div
+              role="alert"
+              class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-medium text-red-800 shadow-sm"
+            >
+              <div>{{ actionError() }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <app-document-tags [documentId]="document.id" [tagIds]="document.tagIds" />
+    </div>
+  </div>
 }
