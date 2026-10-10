@@ -36,6 +36,11 @@ Open http://localhost:4200/.
 The development server reloads when source files change.
 Stop it with Ctrl+C.
 
+Requests to `/api` are forwarded to the backend at `http://localhost:5000`
+(`dotnet run --project src/DMS.API --launch-profile http` from `DMS`).
+Start the backend before loading the document dashboard. In Docker, nginx
+forwards the same `/api` paths to the API container.
+
 The root URL redirects to `/documents`.
 Unknown URLs display the "Page not found" page.
 
@@ -73,8 +78,8 @@ npm test
 
 ## Current scope
 
-The initial setup includes the application shell, a dashboard
-placeholder, routing, and a fallback page.
+The frontend includes the application shell, routing, a fallback page,
+and a basic document list loaded from the REST API with loading and error messages.
 
-REST API integration, document-management features, container
-deployment, and the authentication decision are pending.
+Upload, document details/editing, tags, collections, and authentication
+are separate follow-up tasks.

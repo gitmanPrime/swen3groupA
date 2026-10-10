@@ -1,2 +1,14 @@
 <h2>Documents</h2>
-<p>Document overview will appear here.</p>
+@if (loading()) {
+  <p>Loading documents...</p>
+} @else if (error()) {
+  <p role="alert">{{ error() }}</p>
+} @else {
+  <ul>
+    @for (document of documents(); track document.id) {
+      <li>{{ document.fileName }}</li>
+    } @empty {
+      <li>No documents yet.</li>
+    }
+  </ul>
+}
