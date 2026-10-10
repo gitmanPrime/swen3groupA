@@ -1,0 +1,21 @@
+<a routerLink="/documents">Back to documents</a>
+<h2>Upload PDF</h2>
+<form (submit)="upload($event, file, description.value)">
+  <fieldset [disabled]="uploading()">
+    <p>
+      <label for="file">PDF file</label>
+      <input #file id="file" type="file" accept=".pdf,application/pdf" />
+    </p>
+    <p>
+      <label for="description">Description (optional)</label>
+      <textarea #description id="description"></textarea>
+    </p>
+    <button type="submit">{{ uploading() ? 'Uploading...' : 'Upload' }}</button>
+  </fieldset>
+</form>
+@if (error()) {
+  <p role="alert">{{ error() }}</p>
+}
+@if (success()) {
+  <p role="status">{{ success() }}</p>
+}

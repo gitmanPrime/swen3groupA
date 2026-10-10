@@ -24,4 +24,11 @@ export class DocumentsApi {
   getById(id: string) {
     return this.http.get<Document>(`/api/documents/${encodeURIComponent(id)}`);
   }
+
+  upload(file: File, description: string) {
+    const form = new FormData();
+    form.append('file', file);
+    if (description.trim()) form.append('description', description.trim());
+    return this.http.post<Document>('/api/documents', form);
+  }
 }

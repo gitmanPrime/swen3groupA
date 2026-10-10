@@ -14,6 +14,11 @@ export const routes: Routes = [
 
   },
   {
+    path: 'documents/upload',
+    loadComponent: () =>
+      import('./features/documents/upload/upload').then(component => component.Upload)
+  },
+  {
     path: 'documents/:id',
     loadComponent: () =>
       import('./features/documents/details/details').then(component => component.Details)
