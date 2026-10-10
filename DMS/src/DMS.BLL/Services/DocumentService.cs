@@ -162,6 +162,10 @@ public class DocumentService : IDocumentService
             throw new NotFoundException($"Tag '{tagId}' is not assigned to document '{documentId}'.");
 
         document.DocumentTags.Remove(membership);
+
+        // WICHTIG: Aktualisierung für den Change Tracker registrieren
+        _documents.Update(document);
+
         await _documents.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Removed tag {TagId} from document {DocumentId}", tagId, documentId);
