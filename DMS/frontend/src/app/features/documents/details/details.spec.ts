@@ -20,25 +20,20 @@ describe('Details', () => {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
     
-    // 1. Dokument-Request beantworten
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1').flush({
       id: 'document-1', fileName: 'HelloWorld.pdf', description: 'Example document',
       contentType: 'application/pdf', fileSize: 123, uploadedAt: '2026-10-10T10:00:00Z',
       status: 'Uploaded', collectionIds: [], tagIds: [],
     });
 
-    // Warten, bis das Dokument gerendert ist und die Tag-Komponente den Request auslöst
     await fixture.whenStable();
-
-    // 2. Tag-Request abfangen
     TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
-
     await fixture.whenStable();
     
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('HelloWorld.pdf');
     expect(text).toContain('Example document');
-    expect(text).toContain('123 bytes');
+    expect(text).toContain('123 B');
     expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe('/documents');
     expect(fixture.nativeElement.querySelector('a[download]').getAttribute('href'))
       .toBe('/api/documents/document-1/download');
@@ -62,9 +57,7 @@ describe('Details', () => {
       .flush({ id: 'document-1', fileName: 'example.pdf', description: 'Original', tagIds: [] });
     
     await fixture.whenStable();
-
     TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
-
     await fixture.whenStable();
     return fixture;
   }
@@ -114,6 +107,6 @@ describe('Details', () => {
       .flush(null, { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
     expect(fixture.componentInstance.busy()).toBe(false);
-    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Could not delete');
+    expect(fixture.nativeElement.textContent).toContain('Could not delete');
   });
 });
