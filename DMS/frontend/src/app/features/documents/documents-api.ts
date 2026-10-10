@@ -31,4 +31,12 @@ export class DocumentsApi {
     if (description.trim()) form.append('description', description.trim());
     return this.http.post<Document>('/api/documents', form);
   }
+
+  updateDescription(id: string, description: string) {
+    return this.http.patch<Document>(`/api/documents/${encodeURIComponent(id)}`, { description });
+  }
+
+  delete(id: string) {
+    return this.http.delete<void>(`/api/documents/${encodeURIComponent(id)}`);
+  }
 }

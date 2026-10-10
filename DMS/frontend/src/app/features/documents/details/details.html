@@ -13,4 +13,25 @@
     <dt>Uploaded</dt><dd>{{ document.uploadedAt | date:'medium' }}</dd>
     <dt>Status</dt><dd>{{ document.status }}</dd>
   </dl>
+  <a [href]="'/api/documents/' + document.id + '/download'" download>Download document</a>
+  <form (submit)="saveDescription($event, description.value)">
+    <p>
+      <label for="description">Description</label>
+      <textarea #description id="description" [value]="document.description ?? ''" [disabled]="busy()"></textarea>
+    </p>
+    <button type="submit" [disabled]="busy()">Save description</button>
+  </form>
+  @if (success()) {
+    <p role="status">{{ success() }}</p>
+  }
+  @if (actionError()) {
+    <p role="alert">{{ actionError() }}</p>
+  }
+  @if (confirmingDelete()) {
+    <p>Delete {{ document.fileName }}? This also removes its stored file.</p>
+    <button type="button" [disabled]="busy()" (click)="deleteDocument()">Confirm deletion</button>
+    <button type="button" [disabled]="busy()" (click)="confirmingDelete.set(false)">Cancel</button>
+  } @else {
+    <button type="button" [disabled]="busy()" (click)="confirmingDelete.set(true)">Delete document</button>
+  }
 }

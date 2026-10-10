@@ -80,9 +80,11 @@ npm test
 
 The frontend includes the application shell, routing, a fallback page,
 and a document list loaded from the REST API with loading and error messages.
-Select a filename to open its read-only metadata page at `/documents/:id`.
+Select a filename to open its metadata page at `/documents/:id`.
+From there, download the original file, save or clear its description,
+or delete the document and stored file after confirming.
 Use "Upload PDF" to upload a non-empty PDF with an optional description.
 After a successful upload, return to the document list to see the new document.
 
-Document editing, tags, collections, and authentication
+Tags, collections, and authentication
 are separate follow-up tasks.
