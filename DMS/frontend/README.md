@@ -36,10 +36,11 @@ Open http://localhost:4200/.
 The development server reloads when source files change.
 Stop it with Ctrl+C.
 
-Requests to `/api` are forwarded to the backend at `http://localhost:5000`
-(`dotnet run --project src/DMS.API --launch-profile http` from `DMS`).
-Start the backend before loading the document dashboard. In Docker, nginx
-forwards the same `/api` paths to the API container.
+Requests to `/api` are forwarded to the Docker backend at `http://localhost:8081`.
+Start the backend from the repository root before loading the document dashboard:
+
+```powershell
+docker compose -f DMS/docker-compose.yml up -d --build dms-api
 
 The root URL redirects to `/documents`.
 Unknown URLs display the "Page not found" page.
