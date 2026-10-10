@@ -1,0 +1,12 @@
+Terminal 1 — database and backend:
+cd DMS
+
+docker compose up -d --wait postgres
+dotnet run --project src/DMS.API --launch-profile http
+The backend applies database migrations automatically. Open Swagger to inspect and test the API.
+
+Terminal 2 — frontend:
+cd DMS\frontend
+npm ci
+npm start
+Open http://localhost:4200/
