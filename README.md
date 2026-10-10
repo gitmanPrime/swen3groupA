@@ -89,7 +89,7 @@ under `shared`. Route components are loaded lazily.
 
 This provides a common foundation for parallel frontend development.
 REST API integration and container deployment will follow.
-Whether authentication is required remains to be clarified.
+Keycloak is configured as the authentication server. Frontend login and API token validation will follow.
 
 ## Progress
 - Created the layered solution and unit test project.
@@ -144,4 +144,35 @@ These technologies are planned but are not yet integrated:
 - Elasticsearch for full-text and fuzzy search.
 - A GenAI API for generating summaries.
 
-Record exact versions and reasons for technology choices when introduced.
+## Local authentication server
+
+We use Keycloak 26.8.0 as the authentication server.
+It runs in development mode with a built-in database for local use.
+
+With Docker Desktop running, execute this from the repository root:
+
+```powershell
+docker compose -f DMS/docker-compose.yml up -d keycloak
+```
+
+Wait for startup, then use these local demo accounts:
+
+| Account | Username | Password |
+|---------|----------|----------|
+| Administrator | admin | admin |
+| Test user | student | student |
+
+- [Admin console](http://localhost:8082/admin/)
+- [Test user account page](http://localhost:8082/realms/dms/account/)
+- Application realm: `dms`
+- Frontend client: `dms-frontend`, a public OpenID Connect client
+
+The file `DMS/keycloak/dms-realm.json` creates the realm, frontend
+client, and test user automatically on a fresh installation.
+The test user receives `default-roles-dms` for account-page access.
+
+Settings persist in the `keycloak_data` Docker volume.
+Startup import skips existing realms, so editing the JSON does
+not update a realm that already exists.
+
+Frontend login and API token validation are separate integration tasks.

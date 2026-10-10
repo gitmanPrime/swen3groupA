@@ -1,0 +1,44 @@
+{
+  "realm": "dms",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "dms-frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost/*",
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost",
+        "http://localhost:4200"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost/*##http://localhost:4200/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "student",
+      "enabled": true,
+      "realmRoles": [ "default-roles-dms" ],
+      "email": "student@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "student",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
