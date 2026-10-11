@@ -24,9 +24,15 @@ export const routes: Routes = [
       import('./features/documents/details/details').then(component => component.Details)
   },
   {
+    path: 'collections',
+    loadComponent: () =>
+      import('./features/documents/collections/collections')
+        .then(component => component.Collections)
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./shared/pages/not-found/not-found')
         .then(component => component.NotFound)
-  }
+  },
 ];

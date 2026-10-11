@@ -29,6 +29,9 @@ describe('Details', () => {
     await fixture.whenStable();
     TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
     await fixture.whenStable();
+
+    TestBed.inject(HttpTestingController).expectOne('/api/collections').flush([]);
+    await fixture.whenStable();
     
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('HelloWorld.pdf');
@@ -42,9 +45,14 @@ describe('Details', () => {
   it('shows an error for a missing document', async () => {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
+    
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1')
       .flush(null, { status: 404, statusText: 'Not Found' });
     await fixture.whenStable();
+
+    TestBed.inject(HttpTestingController).expectOne('/api/collections').flush([]);
+    await fixture.whenStable();
+
     expect(fixture.nativeElement.querySelector('[role="alert"]').textContent)
       .toContain('Could not load document details');
   });
@@ -59,6 +67,10 @@ describe('Details', () => {
     await fixture.whenStable();
     TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
     await fixture.whenStable();
+
+    TestBed.inject(HttpTestingController).expectOne('/api/collections').flush([]);
+    await fixture.whenStable();
+
     return fixture;
   }
 
