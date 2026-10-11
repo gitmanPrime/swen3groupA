@@ -1,12 +1,46 @@
-Terminal 1 — database and backend:
-cd DMS
+Local development (PowerShell)
 
-docker compose up -d --wait postgres
-dotnet run --project src/DMS.API --launch-profile http
-The backend applies database migrations automatically. Open Swagger to inspect and test the API.
+Prerequisites: Docker Desktop running, Node.js 24.x, and npm 11.x.
+The existing DMS/.env supplies POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD.
 
-Terminal 2 — frontend:
-cd DMS\frontend
+Terminal 1 - Docker backend, database, and Keycloak:
+Set-Location D:\gitreps\swen3groupA\DMS
+docker compose up -d --build --wait dms-api keycloak
+
+PostgreSQL starts automatically with the backend. The backend applies database
+migrations on startup. Keycloak can take additional time to initialize; inspect
+its logs with: docker compose logs -f keycloak
+
+Terminal 2 - frontend:
+Set-Location D:\gitreps\swen3groupA\DMS\frontend
 npm ci
 npm start
-Open http://localhost:4200/
+
+Frontend: http://localhost:4200/
+API health: http://localhost:8081/health
+Keycloak admin console: http://localhost:8082/admin/ (admin / admin)
+Keycloak test account: http://localhost:8082/realms/dms/account/ (student / student)
+
+The frontend forwards /api requests to localhost:8081.
+Keycloak is configured, but frontend login and API token validation are pending.
+Swagger is enabled only in Development; it is unavailable in the default Docker
+backend environment.
+
+Alternative - run the backend locally for .NET development and Swagger:
+Requires the .NET 10 SDK. Use these commands instead of the Terminal 1 commands.
+Set-Location D:\gitreps\swen3groupA\DMS
+docker compose stop dms-api
+docker compose up -d --wait postgres keycloak
+dotnet run --project src/DMS.API --launch-profile http --urls http://localhost:8081
+
+This uses the API's database defaults (database/user/password: dms).
+If DMS/.env uses different values, set ConnectionStrings__Postgres to match
+before running the API. Docker Compose does not load .env into dotnet run.
+Swagger: http://localhost:8081/swagger
+Use the same Terminal 2 frontend commands above.
+
+Stop:
+Press Ctrl+C in the frontend terminal and, if used, the local backend terminal.
+Set-Location D:\gitreps\swen3groupA\DMS
+docker compose stop
+Database, uploaded files, and Keycloak settings persist in Docker volumes.
