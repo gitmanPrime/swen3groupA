@@ -19,7 +19,7 @@ describe('Details', () => {
   it('loads and displays the selected document', async () => {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
-    
+
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1').flush({
       id: 'document-1', fileName: 'HelloWorld.pdf', description: 'Example document',
       contentType: 'application/pdf', fileSize: 123, uploadedAt: '2026-10-10T10:00:00Z',
@@ -32,7 +32,7 @@ describe('Details', () => {
 
     TestBed.inject(HttpTestingController).expectOne('/api/collections').flush([]);
     await fixture.whenStable();
-    
+
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('HelloWorld.pdf');
     expect(text).toContain('Example document');
@@ -45,7 +45,7 @@ describe('Details', () => {
   it('shows an error for a missing document', async () => {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
-    
+
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1')
       .flush(null, { status: 404, statusText: 'Not Found' });
     await fixture.whenStable();
@@ -60,10 +60,10 @@ describe('Details', () => {
   async function loadedDetails() {
     const fixture = TestBed.createComponent(Details);
     await fixture.whenStable();
-    
+
     TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1')
       .flush({ id: 'document-1', fileName: 'example.pdf', description: 'Original', tagIds: [] });
-    
+
     await fixture.whenStable();
     TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
     await fixture.whenStable();
@@ -120,5 +120,72 @@ describe('Details', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.busy()).toBe(false);
     expect(fixture.nativeElement.textContent).toContain('Could not delete');
+  });
+
+  it('adds the document to a selected collection', async () => {
+    const fixture = TestBed.createComponent(Details);
+    await fixture.whenStable();
+
+    TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1').flush({
+      id: 'document-1', fileName: 'example.pdf', description: 'Original',
+      collectionIds: [], tagIds: [],
+    });
+    await fixture.whenStable();
+    TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
+    await fixture.whenStable();
+    TestBed.inject(HttpTestingController).expectOne('/api/collections').flush([
+      { id: 'col-1', name: 'Marketing', createdAt: '2026-10-01T00:00:00Z', documentCount: 0 },
+    ]);
+    await fixture.whenStable();
+
+    fixture.componentInstance.selectedCollectionId.set('col-1');
+    fixture.componentInstance.addToCollection();
+
+    const request = TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ collectionIds: ['col-1'] });
+    request.flush({
+      id: 'document-1', fileName: 'example.pdf', description: 'Original',
+      collectionIds: ['col-1'], tagIds: [],
+    });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('Document added to collection successfully.');
+    expect(fixture.nativeElement.textContent).toContain('Marketing');
+    // the dropdown resets once the collection has been added
+    expect(fixture.componentInstance.selectedCollectionId()).toBe('');
+  });
+
+  it('removes the document from a collection', async () => {
+    const fixture = TestBed.createComponent(Details);
+    await fixture.whenStable();
+
+    TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1').flush({
+      id: 'document-1', fileName: 'example.pdf', description: 'Original',
+      collectionIds: ['col-1'], tagIds: [],
+    });
+    await fixture.whenStable();
+    TestBed.inject(HttpTestingController).expectOne('/api/tags').flush([]);
+    await fixture.whenStable();
+    TestBed.inject(HttpTestingController).expectOne('/api/collections').flush([
+      { id: 'col-1', name: 'Marketing', createdAt: '2026-10-01T00:00:00Z', documentCount: 1 },
+    ]);
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('Marketing');
+
+    fixture.componentInstance.removeFromCollection('col-1');
+
+    const request = TestBed.inject(HttpTestingController).expectOne('/api/documents/document-1');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ collectionIds: [] });
+    request.flush({
+      id: 'document-1', fileName: 'example.pdf', description: 'Original',
+      collectionIds: [], tagIds: [],
+    });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('Document removed from collection.');
+    expect(fixture.nativeElement.textContent).toContain('Not assigned to any collection yet.');
   });
 });
