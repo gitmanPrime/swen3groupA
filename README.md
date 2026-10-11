@@ -176,3 +176,15 @@ Startup import skips existing realms, so editing the JSON does
 not update a realm that already exists.
 
 Frontend login and API token validation are separate integration tasks.
+
+## Team workflow
+
+We track our work on the [Kanban board](https://github.com/users/gitmanPrime/projects/2).
+
+- Assign each issue to the responsible team member.
+- Move it to Ready when it can be started, then In progress when work begins.
+- Create a branch from the latest main for each issue.
+- Make small commits with clear messages.
+- Open a pull request into main and include `Closes #<issue-number>` in its description.
+- Move the issue to Review / Verification and ask another team member to review it.
+- After review, successful checks, and merging, move the issue to Done.
