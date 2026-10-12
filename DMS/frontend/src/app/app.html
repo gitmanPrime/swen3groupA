@@ -26,21 +26,30 @@
 
       <!-- Primary navigation -->
       <nav class="flex items-center gap-1">
-        <a
-          routerLink="/documents"
-          routerLinkActive="bg-slate-100 text-slate-900"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
+        <a routerLink="/documents"
+           routerLinkActive="bg-slate-100 text-slate-900"
+           [routerLinkActiveOptions]="{ exact: true }"
+           class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
           Documents
         </a>
-        <a
-          routerLink="/documents/upload"
-          routerLinkActive="bg-slate-100 text-slate-900"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
+        <a routerLink="/documents/upload"
+           routerLinkActive="bg-slate-100 text-slate-900"
+           class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
           Upload
         </a>
+        @if (auth.isLoggedIn) {
+        <button type="button"
+                (click)="auth.logout()"
+                class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">
+          Log out
+        </button>
+        } @else {
+        <button type="button"
+                (click)="auth.login()"
+                class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          Log in
+        </button>
+        }
       </nav>
     </div>
   </header>
