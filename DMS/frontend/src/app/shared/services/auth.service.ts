@@ -22,6 +22,20 @@ export class AuthService {
     return this.keycloak.authenticated === true;
   }
 
+  async getAccessToken(): Promise<string | null> {
+    if (!this.isLoggedIn) {
+      return null;
+    }
+
+    try {
+      await this.keycloak.updateToken(30);
+      return this.keycloak.token ?? null;
+    } catch {
+      this.keycloak.clearToken();
+      throw new Error('Could not refresh your session. Please log in again.');
+    }
+  }
+
   login(): Promise<void> {
     return this.keycloak.login({
       redirectUri: `${window.location.origin}/documents`
