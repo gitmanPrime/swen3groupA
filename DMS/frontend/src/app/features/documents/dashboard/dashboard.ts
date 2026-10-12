@@ -10,7 +10,6 @@ import { RouterLink } from '@angular/router';
   selector: 'app-dashboard',
   imports: [RouterLink],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
   private readonly api = inject(DocumentsApi);

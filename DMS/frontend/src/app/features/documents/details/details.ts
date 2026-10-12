@@ -27,6 +27,7 @@ export class Details implements OnInit {
   readonly actionError = signal('');
   readonly success = signal('');
   readonly confirmingDelete = signal(false);
+  readonly downloading = signal(false);
 
   ngOnInit() {
     const documentId = this.route.snapshot.paramMap.get('id')!;
@@ -141,5 +142,36 @@ export class Details implements OnInit {
     const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
     const value = bytes / Math.pow(1024, exponent);
     return `${exponent === 0 ? value : value.toFixed(1)} ${units[exponent]}`;
+  }
+  downloadDocument() {
+    const doc = this.document();
+    if (!doc || this.downloading()) return;
+
+    this.downloading.set(true);
+    this.actionError.set('');
+    this.success.set('');
+
+    this.api.download(doc.id).subscribe({
+      next: (file) => {
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.download = doc.fileName;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // Give the browser time to start the download before releasing the URL.
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        this.downloading.set(false);
+      },
+      error: () => {
+        this.actionError.set('Could not download the document. Please try again.');
+        this.downloading.set(false);
+      }
+    });
   }
 }
