@@ -20,7 +20,7 @@ services:
   dms-api:
     build:
       context: .                  # Ordner mit DMS.sln und src/
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     ports:
       - "8081:8080"
     depends_on:
@@ -34,7 +34,7 @@ services:
   dms-frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     ports:
       - "80:80"
     depends_on:
