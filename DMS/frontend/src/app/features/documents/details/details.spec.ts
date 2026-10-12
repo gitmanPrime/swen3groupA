@@ -14,7 +14,12 @@ describe('Details', () => {
     ],
   }));
 
-  afterEach(() => TestBed.inject(HttpTestingController).verify());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    TestBed.inject(HttpTestingController).verify();
+  });
 
   it('loads and displays the selected document', async () => {
     const fixture = TestBed.createComponent(Details);
@@ -38,8 +43,9 @@ describe('Details', () => {
     expect(text).toContain('Example document');
     expect(text).toContain('123 B');
     expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe('/documents');
-    expect(fixture.nativeElement.querySelector('a[download]').getAttribute('href'))
-      .toBe('/api/documents/document-1/download');
+    expect(
+      fixture.nativeElement.querySelector('#download-document').textContent
+    ).toContain('Download file');
   });
 
   it('shows an error for a missing document', async () => {
@@ -120,5 +126,78 @@ describe('Details', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.busy()).toBe(false);
     expect(fixture.nativeElement.textContent).toContain('Could not delete');
+  });
+  it('downloads the file through the API with its original filename', async () => {
+    const fixture = await loadedDetails();
+    const file = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+    const createObjectURL = vi.fn(() => 'blob:test-download');
+    const revokeObjectURL = vi.fn();
+
+    // Keep the normal URL functionality and mock only the object URL methods.
+    vi.stubGlobal('URL', class extends URL {
+      static override createObjectURL = createObjectURL;
+      static override revokeObjectURL = revokeObjectURL;
+    });
+
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        expect(this.download).toBe('example.pdf');
+        expect(this.href).toBe('blob:test-download');
+      });
+
+    vi.useFakeTimers();
+
+    const button: HTMLButtonElement =
+      fixture.nativeElement.querySelector('#download-document');
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(button.disabled).toBe(true);
+
+    const request = TestBed.inject(HttpTestingController)
+      .expectOne('/api/documents/document-1/download');
+
+    expect(request.request.method).toBe('GET');
+    expect(request.request.responseType).toBe('blob');
+
+    request.flush(file);
+    fixture.detectChanges();
+
+    expect(createObjectURL).toHaveBeenCalledWith(file);
+    expect(click).toHaveBeenCalledOnce();
+    expect(button.disabled).toBe(false);
+
+    vi.advanceTimersByTime(1000);
+
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:test-download');
+  });
+
+  it('shows a download error and enables retry', async () => {
+    const fixture = await loadedDetails();
+    const button: HTMLButtonElement =
+      fixture.nativeElement.querySelector('#download-document');
+
+    button.click();
+
+    const request = TestBed.inject(HttpTestingController)
+      .expectOne('/api/documents/document-1/download');
+
+    request.flush(null, {
+      status: 500,
+      statusText: 'Internal Server Error'
+    });
+
+    fixture.detectChanges();
+
+    expect(button.disabled).toBe(false);
+    expect(fixture.nativeElement.textContent)
+      .toContain('Could not download the document. Please try again.');
+
+    button.click();
+
+    TestBed.inject(HttpTestingController)
+      .expectOne('/api/documents/document-1/download')
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
   });
 });

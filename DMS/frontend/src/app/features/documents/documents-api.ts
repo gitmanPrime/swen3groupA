@@ -33,6 +33,13 @@ export class DocumentsApi {
     return this.http.post<Document>('/api/documents', form);
   }
 
+  download(id: string) {
+    return this.http.get(
+      `/api/documents/${encodeURIComponent(id)}/download`,
+      { responseType: 'blob' }
+    );
+  }
+
   updateDescription(id: string, description: string) {
     return this.http.patch<Document>(`/api/documents/${encodeURIComponent(id)}`, { description });
   }
