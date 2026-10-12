@@ -1,5 +1,48 @@
 # DMS Project Documentation
 
+## Run the Sprint 2 submission
+
+Prerequisite: Docker Desktop (Linux containers) with Docker Compose. Run these
+commands from the extracted repository root. No local Node.js or .NET SDK is
+needed for the Docker setup.
+
+```powershell
+# First run only: create local demo settings; keep an existing .env.
+Copy-Item DMS/.env.example DMS/.env
+docker compose -f DMS/docker-compose.yml build
+docker compose -f DMS/docker-compose.yml up -d --wait
+```
+
+On Linux/macOS, use `cp DMS/.env.example DMS/.env` for the first command.
+Allow Keycloak extra time on first startup; `--wait` does not check its login
+readiness. Inspect startup with `docker compose -f DMS/docker-compose.yml logs keycloak`.
+
+Open [DMS](http://localhost/), choose **Log in**, and sign in with
+**student / student**. The dashboard lists documents. Use **Upload** to upload a
+PDF, then select its filename to view details, edit its description, download it,
+or manage tags and collections. The browser sends `/api` requests through nginx
+to the API container.
+
+| Service | Address |
+|---------|---------|
+| Frontend | http://localhost/ |
+| API health | http://localhost:8081/health |
+| Keycloak admin | http://localhost:8082/admin/ (admin / admin with example settings) |
+| PostgreSQL | localhost:5432 (dms / dms with example settings) |
+
+Ports 80, 5432, 8081, and 8082 must be available. The API applies database
+migrations automatically. Database records, uploaded files, and Keycloak state
+persist in Docker volumes. Stop the application without deleting data:
+
+```powershell
+docker compose -f DMS/docker-compose.yml stop
+```
+
+Demo credentials are for local assessment only. Frontend login is implemented;
+**backend access-token validation (#36) is deferred to Sprint 3**, so the API
+does not yet reject unauthenticated requests. See [Sprint 2 verification](docs/sprint-2-verification.md)
+for the submission checks and [how-to-start.txt](how-to-start.txt) for local development.
+
 ## Contributors
  - **at-fhtw** - Abdulah Tepsurkaev (if24b293)
  - **gitmanPrime** - Michael Kovacevic (if23b015)
@@ -89,7 +132,7 @@ under `shared`. Route components are loaded lazily.
 
 This provides a common foundation for parallel frontend development.
 REST API integration and container deployment will follow.
-Keycloak is configured as the authentication server. Frontend login and API token validation will follow.
+Keycloak provides frontend login and logout. API token validation is deferred to Sprint 3 (#36).
 
 ## Progress
 - Created the layered solution and unit test project.
@@ -99,9 +142,9 @@ Keycloak is configured as the authentication server. Frontend login and API toke
 - Added API health endpoint (GET /health returns "Healthy").
 - Sprint 1: implemented domain model, EF Core + Npgsql persistence, repositories,
   business services, REST API with Swagger UI, local file storage and unit tests.
-- Sprint 2 preparation: added the Angular frontend scaffold,
-  application shell, dashboard placeholder, and fallback page.
-  Production build and component tests pass locally.
+- Sprint 2: Angular dashboard, PDF upload, document details, downloads,
+  description editing, deletion, tags, collections, and Keycloak frontend login.
+  Docker Compose runs nginx, the API, PostgreSQL, and Keycloak together.
 - Frontend installation, development, build, and testing instructions
   are available in [DMS/frontend/README.md](DMS/frontend/README.md).
 
@@ -175,7 +218,7 @@ Settings persist in the `keycloak_data` Docker volume.
 Startup import skips existing realms, so editing the JSON does
 not update a realm that already exists.
 
-Frontend login and API token validation are separate integration tasks.
+Frontend login is integrated. API token validation (#36) remains for Sprint 3.
 
 ## Team workflow
 

@@ -40,7 +40,7 @@ Requests to `/api` are forwarded to the Docker backend at `http://localhost:8081
 Start the backend from the repository root before loading the document dashboard:
 
 ```powershell
-docker compose -f DMS/docker-compose.yml up -d --build dms-api
+docker compose -f DMS/docker-compose.yml up -d --build dms-api keycloak
 ```
 
 The root URL redirects to `/documents`.
@@ -88,5 +88,7 @@ or delete the document and stored file after confirming.
 Use "Upload PDF" to upload a non-empty PDF with an optional description.
 After a successful upload, return to the document list to see the new document.
 
-Tags, collections, and authentication
-are separate follow-up tasks.
+Tags, collections, and Keycloak login/logout are implemented.
+Sign in with the local demo account `student` / `student`.
+Backend token validation is deferred to Sprint 3 (#36).
+For the complete Docker setup at http://localhost/, follow the root README.

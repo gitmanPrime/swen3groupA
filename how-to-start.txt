@@ -1,46 +1,52 @@
-Local development (PowerShell)
+Sprint 2 - full Docker setup (recommended)
 
-Prerequisites: Docker Desktop running, Node.js 24.x, and npm 11.x.
-The existing DMS/.env supplies POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD.
+Prerequisite: Docker Desktop running with Linux containers.
+From the extracted repository root, copy the example settings if there is no
+DMS/.env yet (do not overwrite an existing configuration):
 
-Terminal 1 - Docker backend, database, and Keycloak:
-Set-Location D:\gitreps\swen3groupA\DMS
-docker compose up -d --build --wait dms-api keycloak
+Copy-Item DMS/.env.example DMS/.env
+ docker compose -f DMS/docker-compose.yml build
+ docker compose -f DMS/docker-compose.yml up -d --wait
 
-PostgreSQL starts automatically with the backend. The backend applies database
-migrations on startup. Keycloak can take additional time to initialize; inspect
-its logs with: docker compose logs -f keycloak
+On Linux/macOS use: cp DMS/.env.example DMS/.env
+Wait for Keycloak startup: docker compose -f DMS/docker-compose.yml logs keycloak
 
-Terminal 2 - frontend:
-Set-Location D:\gitreps\swen3groupA\DMS\frontend
+Frontend: http://localhost/ (Log in with student / student)
+API health: http://localhost:8081/health
+Keycloak admin: http://localhost:8082/admin/ (admin / admin with example settings)
+
+Use Upload to add a PDF, Documents to see the dashboard, and a filename to
+open details. Requests pass through nginx to the backend. Database migrations
+run automatically. The API does not yet validate access tokens (#36, Sprint 3).
+
+Stop without deleting stored data:
+docker compose -f DMS/docker-compose.yml stop
+
+Local frontend development (optional)
+
+Requires Node.js 24.x and npm. From the repository root:
+docker compose -f DMS/docker-compose.yml up -d --build --wait dms-api keycloak
+Set-Location DMS/frontend
 npm ci
 npm start
 
-Frontend: http://localhost:4200/
-API health: http://localhost:8081/health
-Keycloak admin console: http://localhost:8082/admin/ (admin / admin)
-Keycloak test account: http://localhost:8082/realms/dms/account/ (student / student)
+Frontend: http://localhost:4200/ (student / student)
+The development server forwards /api requests to localhost:8081.
+Stop the frontend with Ctrl+C.
 
-The frontend forwards /api requests to localhost:8081.
-Keycloak is configured, but frontend login and API token validation are pending.
-Swagger is enabled only in Development; it is unavailable in the default Docker
-backend environment.
+Local backend development and Swagger (optional)
 
-Alternative - run the backend locally for .NET development and Swagger:
-Requires the .NET 10 SDK. Use these commands instead of the Terminal 1 commands.
-Set-Location D:\gitreps\swen3groupA\DMS
-docker compose stop dms-api
-docker compose up -d --wait postgres keycloak
-dotnet run --project src/DMS.API --launch-profile http --urls http://localhost:8081
+Requires the .NET 10 SDK. From the repository root:
+docker compose -f DMS/docker-compose.yml stop dms-api
+docker compose -f DMS/docker-compose.yml up -d --wait postgres keycloak
+dotnet run --project DMS/src/DMS.API --launch-profile http --urls http://localhost:8081
 
-This uses the API's database defaults (database/user/password: dms).
-If DMS/.env uses different values, set ConnectionStrings__Postgres to match
-before running the API. Docker Compose does not load .env into dotnet run.
-Swagger: http://localhost:8081/swagger
-Use the same Terminal 2 frontend commands above.
+The local API defaults to database/user/password dms. If your DMS/.env differs,
+set ConnectionStrings__Postgres accordingly; dotnet run does not load .env.
+Swagger: http://localhost:8081/swagger (Development environment only).
 
-Stop:
-Press Ctrl+C in the frontend terminal and, if used, the local backend terminal.
-Set-Location D:\gitreps\swen3groupA\DMS
-docker compose stop
-Database, uploaded files, and Keycloak settings persist in Docker volumes.
+Tests (from repository root):
+dotnet test DMS/src/DMS.UnitTests/DMS.UnitTests.csproj
+Set-Location DMS/frontend
+npm ci
+npm test -- --watch=false
