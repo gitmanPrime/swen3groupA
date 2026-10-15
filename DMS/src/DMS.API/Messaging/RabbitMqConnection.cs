@@ -8,6 +8,8 @@ public sealed class RabbitMqConnection(IOptions<RabbitMqOptions> options, ILogge
 {
     private IConnection? _connection;
 
+    public IConnection Connection => _connection ?? throw new InvalidOperationException("RabbitMQ connection has not been started.");
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var settings = options.Value;

@@ -1,6 +1,7 @@
 using DMS.API.Middleware;
 using DMS.API.Messaging;
 using DMS.BLL;
+using DMS.BLL.Interfaces.Services;
 using DMS.DAL;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -24,7 +25,12 @@ builder.Services.AddOptions<RabbitMqOptions>()
     .Validate(settings => !string.IsNullOrWhiteSpace(settings.Password), "RabbitMQ password is required.")
     .Validate(settings => !string.IsNullOrWhiteSpace(settings.QueueName), "RabbitMQ queue name is required.")
     .ValidateOnStart();
-builder.Services.AddHostedService<RabbitMqConnection>();
+builder.Services.AddSingleton<RabbitMqConnection>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<RabbitMqConnection>());
+builder.Services.AddSingleton<IOcrQueuePublisher>(provider => new OcrQueuePublisher(
+    provider.GetRequiredService<RabbitMqConnection>().Connection,
+    provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<RabbitMqOptions>>(),
+    provider.GetRequiredService<ILogger<OcrQueuePublisher>>()));
 
 // Application layers
 builder.Services.AddBusinessLogic();
