@@ -1,4 +1,5 @@
 using DMS.API.Middleware;
+using DMS.API.Messaging;
 using DMS.BLL;
 using DMS.DAL;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddHealthChecks();
+
+builder.Services.AddOptions<RabbitMqOptions>()
+    .Bind(builder.Configuration.GetSection(RabbitMqOptions.SectionName))
+    .Validate(settings => !string.IsNullOrWhiteSpace(settings.HostName), "RabbitMQ host is required.")
+    .Validate(settings => settings.Port is > 0 and <= 65535, "RabbitMQ port must be between 1 and 65535.")
+    .Validate(settings => !string.IsNullOrWhiteSpace(settings.UserName), "RabbitMQ username is required.")
+    .Validate(settings => !string.IsNullOrWhiteSpace(settings.Password), "RabbitMQ password is required.")
+    .Validate(settings => !string.IsNullOrWhiteSpace(settings.QueueName), "RabbitMQ queue name is required.")
+    .ValidateOnStart();
+builder.Services.AddHostedService<RabbitMqConnection>();
 
 // Application layers
 builder.Services.AddBusinessLogic();
