@@ -19,13 +19,15 @@ public class DocumentService : IDocumentService
     private readonly IFileStorage _storage;
     private readonly IMapper _mapper;
     private readonly ILogger<DocumentService> _logger;
+    private readonly IOcrQueuePublisher _ocrPublisher;
 
-    public DocumentService(IDocumentRepository documents, ICollectionRepository collections, ITagRepository tags, IFileStorage storage, IMapper mapper, ILogger<DocumentService> logger)
+    public DocumentService(IDocumentRepository documents, ICollectionRepository collections, ITagRepository tags, IFileStorage storage, IOcrQueuePublisher ocrPublisher, IMapper mapper, ILogger<DocumentService> logger)
     {
         _documents = documents;
         _collections = collections;
         _tags = tags;
         _storage = storage;
+        _ocrPublisher = ocrPublisher;
         _mapper = mapper;
         _logger = logger;
     }
@@ -57,6 +59,17 @@ public class DocumentService : IDocumentService
 
         await _documents.AddAsync(document, cancellationToken);
         await _documents.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            var ocrRequest = new OcrRequest(document.Id, document.FileName);
+            await _ocrPublisher.PublishAsync(ocrRequest, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish OCR request for document {DocumentId}", document.Id);
+            throw new InvalidOperationException("Document was saved, but queuing for OCR processing failed.", ex);
+        }
 
         _logger.LogInformation(
             "Uploaded document {DocumentId} ({FileName}, {FileSize} bytes, {ContentType})",
