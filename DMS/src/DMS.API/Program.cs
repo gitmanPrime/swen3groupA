@@ -5,6 +5,7 @@ using DMS.BLL.Interfaces.Services;
 using DMS.DAL;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddHealthChecks();
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Authentication:Authority"];
+        options.MetadataAddress =
+            builder.Configuration["Authentication:MetadataAddress"] ?? string.Empty;
+        options.Audience = builder.Configuration["Authentication:Audience"];
+        options.RequireHttpsMetadata = false; // Local Keycloak uses HTTP.
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddOptions<RabbitMqOptions>()
     .Bind(builder.Configuration.GetSection(RabbitMqOptions.SectionName))
@@ -56,6 +70,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 //app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

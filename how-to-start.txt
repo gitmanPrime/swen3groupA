@@ -17,7 +17,7 @@ Keycloak admin: http://localhost:8082/admin/ (admin / admin with example setting
 
 Use Upload to add a PDF, Documents to see the dashboard, and a filename to
 open details. Requests pass through nginx to the backend. Database migrations
-run automatically. The API does not yet validate access tokens (#36, Sprint 3).
+run automatically. Document, tag, and collection endpoints require a valid Keycloak access token.
 
 Stop without deleting stored data:
 docker compose -f DMS/docker-compose.yml stop
