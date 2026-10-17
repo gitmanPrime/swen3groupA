@@ -49,6 +49,7 @@ services:
       RabbitMQ__HostName: rabbitmq
       RabbitMQ__UserName: ${RABBITMQ_USER}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Authentication__MetadataAddress: "http://keycloak:8080/realms/dms/.well-known/openid-configuration"
     volumes:
       - dms_data:/app/App_Data
 
@@ -67,6 +68,8 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      KC_HOSTNAME: "http://localhost:8082"
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
     ports:
       - "127.0.0.1:8082:8080"
     volumes:

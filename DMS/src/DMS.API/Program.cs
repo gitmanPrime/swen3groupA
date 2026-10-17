@@ -23,6 +23,8 @@ builder.Services
     .AddJwtBearer(options =>
     {
         options.Authority = builder.Configuration["Authentication:Authority"];
+        options.MetadataAddress =
+            builder.Configuration["Authentication:MetadataAddress"] ?? string.Empty;
         options.Audience = builder.Configuration["Authentication:Audience"];
         options.RequireHttpsMetadata = false; // Local Keycloak uses HTTP.
     });
