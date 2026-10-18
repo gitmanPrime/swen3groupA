@@ -52,6 +52,22 @@ services:
     volumes:
       - dms_data:/app/App_Data
 
+  ocr-worker:
+    build:
+      context: .
+      dockerfile: src/DMS.OcrWorker/Dockerfile
+    container_name: dms-ocr-worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER:-dms}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD:-dms}
+      - RabbitMQ__QueueName=ocr.documents
+    restart: unless-stopped
+
   dms-frontend:
     build:
       context: ./frontend
