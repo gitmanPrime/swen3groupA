@@ -6,7 +6,7 @@ namespace DMS.API.Controllers;
 
 [ApiController]
 [Route("api/documents")]
-public class DocumentsController(IDocumentService documents, IOcrQueuePublisher ocrPublisher) : ControllerBase
+public class DocumentsController(IDocumentService documents) : ControllerBase
 {
     /// <summary>Uploads a new document using multipart/form-data.</summary>
     [HttpPost]
@@ -33,7 +33,6 @@ public class DocumentsController(IDocumentService documents, IOcrQueuePublisher 
             content,
             description,
             cancellationToken);
-        await ocrPublisher.PublishAsync(new OcrRequest(document.Id, document.FileName), cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id = document.Id }, document);
     }
