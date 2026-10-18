@@ -1,3 +1,4 @@
+using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
 using DMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -36,8 +37,19 @@ public class CollectionRepository(DmsDbContext dbContext) : ICollectionRepositor
         return dbContext.DocumentCollections.CountAsync(dc => dc.CollectionId == id, cancellationToken);
     }
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new ConflictException("A database conflict or constraint violation occured while saving changes.", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An unexpected error occured while accessing the database.", ex);
+        }
     }
 }

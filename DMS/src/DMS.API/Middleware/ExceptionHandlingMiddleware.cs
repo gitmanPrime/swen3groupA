@@ -36,6 +36,10 @@ public class ExceptionHandlingMiddleware
         {
             await WriteValidationProblemAsync(context, ex.Errors);
         }
+        catch (MessagingException ex)
+        {
+            await WriteProblemAsync(context, StatusCodes.Status503ServiceUnavailable, "Messaging Service Error", ex.Message);
+        }
         catch (BadHttpRequestException ex)
         {
             await WriteProblemAsync(context, StatusCodes.Status400BadRequest, "Bad Request", ex.Message);

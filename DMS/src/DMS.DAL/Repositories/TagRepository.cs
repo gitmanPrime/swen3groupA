@@ -1,3 +1,4 @@
+using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
 using DMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -26,8 +27,19 @@ public class TagRepository(DmsDbContext dbContext) : ITagRepository
         await dbContext.Tags.AddAsync(tag, cancellationToken);
     }
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new ConflictException("A database conflict or constraint violation occurred while saving changes.", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An unexpected error occurred while accessing the database.", ex);
+        }
     }
 }

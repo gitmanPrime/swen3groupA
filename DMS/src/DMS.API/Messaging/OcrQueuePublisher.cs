@@ -1,5 +1,6 @@
 using System.Text.Json;
 using DMS.BLL.Dtos;
+using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Services;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -42,7 +43,7 @@ public sealed class OcrQueuePublisher(IConnection connection, IOptions<RabbitMqO
         catch (Exception exception)
         {
             logger.LogError(exception, "Failed to publish OCR request for document {DocumentId}", request.DocumentId);
-            throw;
+            throw new MessagingException("Failed to publish OCR request to RabbitMQ queue.", exception);
         }
         finally
         {
