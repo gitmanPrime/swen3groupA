@@ -4,10 +4,25 @@
     "description": "Document Management System API - Sprint 1 endpoints (Documents, Collections, Tags).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "bearerToken",
+      "value": "",
       "type": "string"
     },
     {
@@ -30,6 +45,73 @@
     {
       "name": "Setup",
       "item": [
+        {
+          "name": "Get Token (Keycloak)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "dms-frontend",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "student",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "student",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8082/realms/dms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "realms",
+                "dms",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"bearerToken\", jsonData.access_token);",
+                  "    console.log(\"Bearer token successfully updated!\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "Create collection",
           "request": {
@@ -146,8 +228,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "if (pm.response.code === 201) {",
-                  "    pm.collectionVariables.set(\"documentId\", pm.response.json().id);",
-                  "}"
+                  "    pm.collectionVariables.set(\n        \"documentId\", \n        pm.response.json().id\n    );\n}"
                 ]
               }
             }
