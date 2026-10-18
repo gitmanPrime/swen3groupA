@@ -223,6 +223,38 @@ dedicated client scope: name dms-api-audience, Included Custom Audience
 dms-api, Add to access token enabled, and Add to ID token disabled.
 Log out and log back in afterward.
 
+## Postman authentication
+
+Import `postman/DMS.postman_collection.json` into Postman.
+The collection uses OAuth 2.0 Authorization Code with PKCE.
+
+For an existing Keycloak realm, open the admin console, select
+realm `dms`, then Clients → dms-frontend → Settings.
+Add this Valid redirect URI and save:
+
+https://oauth.pstmn.io/v1/browser-callback
+
+Fresh realms receive this callback from the realm import file.
+Startup import does not update existing realms.
+
+With the application running:
+
+1. Open the DMS API collection's Authorization tab.
+2. Confirm Authorization Code (With PKCE), SHA-256, and client
+   `dms-frontend`. Leave Client Secret empty.
+3. Enable Authorize using browser and confirm the callback above.
+4. Select Get New Access Token and log in with student / student.
+5. Select Use Token.
+6. Send GET http://localhost:8081/api/documents with authorization
+   inherited from the collection. Expect HTTP 200.
+7. Temporarily select No Auth on that request. Expect HTTP 401,
+   then restore Inherit auth from parent.
+
+Do not commit generated access or refresh tokens.
+
+Verification status: collection import and interactive authentication
+are pending manual testing.
+
 ## Team workflow
 
 We track our work on the [Kanban board](https://github.com/users/gitmanPrime/projects/2).
