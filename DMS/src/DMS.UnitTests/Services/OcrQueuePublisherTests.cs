@@ -69,5 +69,22 @@ public class OcrQueuePublisherTests
 
         Assert.Same(brokerError, exception.InnerException);
     }
+
+    [Theory]
+    [InlineData(true, "example.pdf")]
+    [InlineData(false, "")]
+    [InlineData(false, " ")]
+    public async Task PublishAsync_InvalidRequestDoesNotContactBroker(
+    bool emptyId, string fileName)
+    {
+        await using var publisher = CreatePublisher();
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            publisher.PublishAsync(new OcrRequest(
+                emptyId ? Guid.Empty : Guid.NewGuid(),
+                fileName)));
+
+        _connection.VerifyNoOtherCalls();
+    }
 }
 
