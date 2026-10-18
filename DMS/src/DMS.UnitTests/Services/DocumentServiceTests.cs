@@ -2,6 +2,7 @@ using AutoMapper;
 using DMS.BLL.Dtos;
 using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
+using DMS.BLL.Interfaces.Services;
 using DMS.BLL.Interfaces.Storage;
 using DMS.BLL.Mapping;
 using DMS.BLL.Services;
@@ -17,6 +18,7 @@ public class DocumentServiceTests
     private readonly Mock<ICollectionRepository> _collections = new();
     private readonly Mock<ITagRepository> _tags = new();
     private readonly Mock<IFileStorage> _storage = new();
+    private readonly Mock<IOcrQueuePublisher> _ocrPublisher = new();
     private static IMapper CreateMapper()
     {
         var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>(), NullLoggerFactory.Instance);
@@ -28,6 +30,7 @@ public class DocumentServiceTests
         _collections.Object,
         _tags.Object,
         _storage.Object,
+        _ocrPublisher.Object,
         CreateMapper(),
         NullLogger<DocumentService>.Instance);
 
@@ -71,6 +74,26 @@ public class DocumentServiceTests
         _storage.Verify(s => s.SaveAsync(stream, "report.pdf", It.IsAny<CancellationToken>()), Times.Once);
         _documents.Verify(d => d.AddAsync(It.Is<Document>(doc => doc.StorageKey == "generated-key"), It.IsAny<CancellationToken>()), Times.Once);
         _documents.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+        _ocrPublisher.Verify(p => p.PublishAsync(
+            It.Is<OcrRequest>(req => req.DocumentId == result.Id && req.FileName == "report.pdf"),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Upload_PublishingFails_ThrowsExceptionAndDoesNotReturnSuccess()
+    {
+        _storage.Setup(s => s.SaveAsync(It.IsAny<Stream>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new StoredFile("generated-key"));
+
+        _ocrPublisher.Setup(p => p.PublishAsync(It.IsAny<OcrRequest>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new IOException("Broker unavailable"));
+
+        var service = CreateSut();
+        using var stream = Content();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UploadAsync("report.pdf", "application/pdf", 512, stream, "Quaterly report"));
     }
 
     [Fact]
