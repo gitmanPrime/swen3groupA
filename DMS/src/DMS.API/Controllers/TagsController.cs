@@ -1,9 +1,11 @@
 using DMS.BLL.Dtos;
 using DMS.BLL.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DMS.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/tags")]
 public class TagsController(ITagService tags) : ControllerBase

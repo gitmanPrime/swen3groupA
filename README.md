@@ -38,10 +38,11 @@ persist in Docker volumes. Stop the application without deleting data:
 docker compose -f DMS/docker-compose.yml stop
 ```
 
-Demo credentials are for local assessment only. Frontend login is implemented;
-**backend access-token validation (#36) is deferred to Sprint 3**, so the API
-does not yet reject unauthenticated requests. See [Sprint 2 verification](docs/sprint-2-verification.md)
-for the submission checks and [how-to-start.txt](how-to-start.txt) for local development.
+Demo credentials are for local assessment only. Keycloak provides frontend
+login and logout. The API validates Keycloak access tokens. Document, tag,
+and collection endpoints require authentication; missing or invalid tokens
+return 401. See [how-to-start.txt](how-to-start.txt) for startup and local
+development instructions.
 
 ## Contributors
  - **at-fhtw** - Abdulah Tepsurkaev (if24b293)
@@ -132,7 +133,6 @@ under `shared`. Route components are loaded lazily.
 
 This provides a common foundation for parallel frontend development.
 REST API integration and container deployment will follow.
-Keycloak provides frontend login and logout. API token validation is deferred to Sprint 3 (#36).
 
 ## Progress
 - Created the layered solution and unit test project.
@@ -218,7 +218,10 @@ Settings persist in the `keycloak_data` Docker volume.
 Startup import skips existing realms, so editing the JSON does
 not update a realm that already exists.
 
-Frontend login is integrated. API token validation (#36) remains for Sprint 3.
+For an existing realm, add an Audience mapper to the dms-frontend
+dedicated client scope: name dms-api-audience, Included Custom Audience
+dms-api, Add to access token enabled, and Add to ID token disabled.
+Log out and log back in afterward.
 
 ## Team workflow
 
