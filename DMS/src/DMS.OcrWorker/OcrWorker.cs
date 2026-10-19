@@ -48,7 +48,7 @@ namespace DMS.OcrWorker
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Failed to connect to RabbitMQ. Retrying in 5 seconds...");
+                    logger.LogWarning(ex, "Failed to connect to RabbitMQ at {HostName}:{Port}. Retrying in 5 seconds...", _options.HostName, _options.Port);
                     await Task.Delay(5000, stoppingToken);
                 }
             }
@@ -61,23 +61,26 @@ namespace DMS.OcrWorker
             var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.ReceivedAsync += async (sender, ea) =>
             {
+                OcrRequest? ocrRequest = null;
                 try
                 {
                     var body = ea.Body.Span;
-                    var ocrRequest = JsonSerializer.Deserialize<OcrRequest>(body);
+                    ocrRequest = JsonSerializer.Deserialize<OcrRequest>(body);
 
-                    if (ocrRequest is not null)
-                    {
-                        logger.LogInformation(
-                            "Received OCR Request -> Document ID: {DocumentId}, File Name: {FileName}",
-                            ocrRequest.DocumentId, ocrRequest.FileName);
-                    }
+                    if (ocrRequest is null)
+                        throw new JsonException("OCR request must not be null.");
+
+                    logger.LogInformation(
+                        "Received OCR request for document {DocumentId} from queue {QueueName} (delivery {DeliveryTag})",
+                        ocrRequest.DocumentId, _options.QueueName, ea.DeliveryTag);
 
                     await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error processing incoming OCR message.");
+                    logger.LogError(ex,
+                        "Failed to process OCR message for document {DocumentId} from queue {QueueName} (delivery {DeliveryTag})",
+                        ocrRequest?.DocumentId, _options.QueueName, ea.DeliveryTag);
                     await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
                 }
             };

@@ -60,6 +60,10 @@ public class DocumentService : IDocumentService
         await _documents.AddAsync(document, cancellationToken);
         await _documents.SaveChangesAsync(cancellationToken);
 
+        _logger.LogInformation(
+            "Uploaded document {DocumentId} ({FileSize} bytes, {ContentType})",
+            document.Id, document.FileSize, document.ContentType);
+
         try
         {
             var ocrRequest = new OcrRequest(document.Id, document.FileName);
@@ -74,10 +78,6 @@ public class DocumentService : IDocumentService
             _logger.LogError(ex, "Failed to publish OCR request for document {DocumentId}", document.Id);
             throw new InvalidOperationException("Document was saved, but queuing for OCR processing failed.", ex);
         }
-
-        _logger.LogInformation(
-            "Uploaded document {DocumentId} ({FileName}, {FileSize} bytes, {ContentType})",
-            document.Id, document.FileName, document.FileSize, document.ContentType);
 
         return ToDto(document);
     }

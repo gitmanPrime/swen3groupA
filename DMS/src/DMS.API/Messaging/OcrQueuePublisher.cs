@@ -38,11 +38,11 @@ public sealed class OcrQueuePublisher(IConnection connection, IOptions<RabbitMqO
                 body: JsonSerializer.SerializeToUtf8Bytes(request),
                 cancellationToken: cancellationToken);
 
-            logger.LogInformation("Published OCR request for document {DocumentId}", request.DocumentId);
+            logger.LogInformation("Published OCR request for document {DocumentId} to queue {QueueName}", request.DocumentId, options.Value.QueueName);
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Failed to publish OCR request for document {DocumentId}", request.DocumentId);
+            logger.LogError(exception, "Failed to publish OCR request for document {DocumentId} to queue {QueueName}", request.DocumentId, options.Value.QueueName);
             throw new MessagingException("Failed to publish OCR request to RabbitMQ queue.", exception);
         }
         finally
