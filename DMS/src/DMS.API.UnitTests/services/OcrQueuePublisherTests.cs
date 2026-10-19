@@ -6,29 +6,30 @@ using Microsoft.Extensions.Options;
 using Moq;
 using RabbitMQ.Client;
 using DMS.BLL.Exceptions;
+using DMS.BLL.Interfaces.Services;
 
-namespace DMS.UnitTests.Services;
+namespace DMS.API.UnitTests.Services;
 
 public class OcrQueuePublisherTests
 {
     private readonly Mock<IConnection> _connection = new();
     private readonly Mock<IChannel> _channel = new();
 
-    private OcrQueuePublisher CreatePublisher()
+    private IOcrQueuePublisher CreatePublisher()
     {
         _connection.Setup(connection => connection.CreateChannelAsync(
                 It.IsAny<CreateChannelOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_channel.Object);
 
         return new OcrQueuePublisher(_connection.Object,
-            Options.Create(new RabbitMqOptions { QueueName = "ocr.documents" }),
+            Options.Create(new DMS.API.Messaging.RabbitMqOptions { QueueName = "ocr.documents" }),
             NullLogger<OcrQueuePublisher>.Instance);
     }
 
     [Fact]
     public async Task PublishAsync_SendsPersistentJsonToOcrQueue()
     {
-        await using var publisher = CreatePublisher();
+        var publisher = CreatePublisher();
         var request = new OcrRequest(Guid.NewGuid(), "example.pdf");
         byte[]? body = null;
         _channel.Setup(channel => channel.BasicPublishAsync(
@@ -51,7 +52,7 @@ public class OcrQueuePublisherTests
     [Fact]
     public async Task PublishAsync_BrokerFailure_PreservesOriginalCause()
     {
-        await using var publisher = CreatePublisher();
+        var publisher = CreatePublisher();
         var brokerError = new IOException("Broker unavailable");
 
         _channel.Setup(channel => channel.BasicPublishAsync(
@@ -77,7 +78,7 @@ public class OcrQueuePublisherTests
     public async Task PublishAsync_InvalidRequestDoesNotContactBroker(
     bool emptyId, string fileName)
     {
-        await using var publisher = CreatePublisher();
+        var publisher = CreatePublisher();
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             publisher.PublishAsync(new OcrRequest(
@@ -87,4 +88,3 @@ public class OcrQueuePublisherTests
         _connection.VerifyNoOtherCalls();
     }
 }
-

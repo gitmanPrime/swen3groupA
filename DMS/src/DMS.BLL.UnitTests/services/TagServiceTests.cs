@@ -6,7 +6,7 @@ using DMS.Domain.Entities;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace DMS.UnitTests.Services;
+namespace DMS.BLL.UnitTests.Services;
 
 public class TagServiceTests
 {
