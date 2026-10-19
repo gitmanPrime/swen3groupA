@@ -97,6 +97,37 @@ public class DocumentServiceTests
     }
 
     [Fact]
+    public async Task Upload_MessagingFailure_PreservesMessagingException()
+    {
+        _storage.Setup(s => s.SaveAsync(
+                It.IsAny<Stream>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new StoredFile("generated-key"));
+
+        var messagingError = new MessagingException(
+            "Failed to publish OCR request to RabbitMQ queue.",
+            new IOException("Broker unavailable"));
+
+        _ocrPublisher.Setup(p => p.PublishAsync(
+                It.IsAny<OcrRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(messagingError);
+
+        using var stream = Content();
+
+        var exception = await Assert.ThrowsAsync<MessagingException>(() =>
+            CreateSut().UploadAsync(
+                "report.pdf",
+                "application/pdf",
+                512,
+                stream,
+                "Quarterly report"));
+
+        Assert.Same(messagingError, exception);
+    }
+
+    [Fact]
     public async Task Upload_EmptyStream_ThrowsValidationException()
     {
         var service = CreateSut();

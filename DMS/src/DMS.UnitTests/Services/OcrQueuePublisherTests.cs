@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using RabbitMQ.Client;
+using DMS.BLL.Exceptions;
 
 namespace DMS.UnitTests.Services;
 
@@ -48,28 +49,40 @@ public class OcrQueuePublisherTests
     }
 
     [Fact]
-    public async Task PublishAsync_BrokerFailureReachesCaller()
+    public async Task PublishAsync_BrokerFailure_PreservesOriginalCause()
     {
         await using var publisher = CreatePublisher();
-        _channel.Setup(channel => channel.BasicPublishAsync(
-                It.IsAny<string>(), It.IsAny<string>(), true,
-                It.IsAny<BasicProperties>(), It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new IOException("Broker unavailable"));
+        var brokerError = new IOException("Broker unavailable");
 
-        await Assert.ThrowsAsync<IOException>(() =>
-            publisher.PublishAsync(new OcrRequest(Guid.NewGuid(), "example.pdf")));
+        _channel.Setup(channel => channel.BasicPublishAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                true,
+                It.IsAny<BasicProperties>(),
+                It.IsAny<ReadOnlyMemory<byte>>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(brokerError);
+
+        var exception = await Assert.ThrowsAsync<MessagingException>(() =>
+            publisher.PublishAsync(
+                new OcrRequest(Guid.NewGuid(), "example.pdf")));
+
+        Assert.Same(brokerError, exception.InnerException);
     }
 
     [Theory]
     [InlineData(true, "example.pdf")]
     [InlineData(false, "")]
     [InlineData(false, " ")]
-    public async Task PublishAsync_InvalidRequestDoesNotContactBroker(bool emptyId, string fileName)
+    public async Task PublishAsync_InvalidRequestDoesNotContactBroker(
+    bool emptyId, string fileName)
     {
         await using var publisher = CreatePublisher();
 
-        await Assert.ThrowsAsync<ArgumentException>(() => publisher.PublishAsync(
-            new OcrRequest(emptyId ? Guid.Empty : Guid.NewGuid(), fileName)));
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            publisher.PublishAsync(new OcrRequest(
+                emptyId ? Guid.Empty : Guid.NewGuid(),
+                fileName)));
 
         _connection.VerifyNoOtherCalls();
     }

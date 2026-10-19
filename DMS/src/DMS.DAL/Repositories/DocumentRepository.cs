@@ -2,6 +2,7 @@ using DMS.BLL.Exceptions;
 using DMS.BLL.Interfaces.Repositories;
 using DMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace DMS.DAL.Repositories;
 
@@ -46,19 +47,29 @@ public class DocumentRepository(DmsDbContext dbContext) : IDocumentRepository
         dbContext.Documents.Remove(document);
     }
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    public async Task SaveChangesAsync(
+    CancellationToken cancellationToken = default)
     {
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
+        catch (DbUpdateException ex) when (
+            ex.InnerException is PostgresException
+            {
+                SqlState: PostgresErrorCodes.UniqueViolation
+                    or PostgresErrorCodes.ForeignKeyViolation
+            })
+        {
+            throw new ConflictException(
+                "The operation conflicts with existing or related data.",
+                ex);
+        }
         catch (DbUpdateException ex)
         {
-            throw new ConflictException("A database conflict or constraint violation occurred while saving changes.", ex);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("An unexpected error occurred while accessing the database.", ex);
+            throw new InvalidOperationException(
+                "An unexpected error occurred while saving database changes.",
+                ex);
         }
     }
 }

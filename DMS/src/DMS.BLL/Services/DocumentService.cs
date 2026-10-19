@@ -65,6 +65,10 @@ public class DocumentService : IDocumentService
             var ocrRequest = new OcrRequest(document.Id, document.FileName);
             await _ocrPublisher.PublishAsync(ocrRequest, cancellationToken);
         }
+        catch (MessagingException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to publish OCR request for document {DocumentId}", document.Id);

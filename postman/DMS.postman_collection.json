@@ -5,11 +5,61 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
-    "type": "bearer",
-    "bearer": [
+    "type": "oauth2",
+    "oauth2": [
       {
-        "key": "token",
-        "value": "{{bearerToken}}",
+        "key": "tokenName",
+        "value": "DMS local",
+        "type": "string"
+      },
+      {
+        "key": "grant_type",
+        "value": "authorization_code_with_pkce",
+        "type": "string"
+      },
+      {
+        "key": "authUrl",
+        "value": "http://localhost:8082/realms/dms/protocol/openid-connect/auth",
+        "type": "string"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "http://localhost:8082/realms/dms/protocol/openid-connect/token",
+        "type": "string"
+      },
+      {
+        "key": "clientId",
+        "value": "dms-frontend",
+        "type": "string"
+      },
+      {
+        "key": "redirect_uri",
+        "value": "https://oauth.pstmn.io/v1/browser-callback",
+        "type": "string"
+      },
+      {
+        "key": "scope",
+        "value": "openid",
+        "type": "string"
+      },
+      {
+        "key": "challengeAlgorithm",
+        "value": "S256",
+        "type": "string"
+      },
+      {
+        "key": "client_authentication",
+        "value": "body",
+        "type": "string"
+      },
+      {
+        "key": "addTokenTo",
+        "value": "header",
+        "type": "string"
+      },
+      {
+        "key": "headerPrefix",
+        "value": "Bearer",
         "type": "string"
       }
     ]
@@ -18,11 +68,6 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:8081",
-      "type": "string"
-    },
-    {
-      "key": "bearerToken",
-      "value": "",
       "type": "string"
     },
     {
@@ -45,73 +90,6 @@
     {
       "name": "Setup",
       "item": [
-        {
-          "name": "Get Token (Keycloak)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/x-www-form-urlencoded"
-              }
-            ],
-            "body": {
-              "mode": "urlencoded",
-              "urlencoded": [
-                {
-                  "key": "grant_type",
-                  "value": "password",
-                  "type": "text"
-                },
-                {
-                  "key": "client_id",
-                  "value": "dms-frontend",
-                  "type": "text"
-                },
-                {
-                  "key": "username",
-                  "value": "student",
-                  "type": "text"
-                },
-                {
-                  "key": "password",
-                  "value": "student",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "http://localhost:8082/realms/dms/protocol/openid-connect/token",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8082",
-              "path": [
-                "realms",
-                "dms",
-                "protocol",
-                "openid-connect",
-                "token"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.collectionVariables.set(\"bearerToken\", jsonData.access_token);",
-                  "    console.log(\"Bearer token successfully updated!\");",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
         {
           "name": "Create collection",
           "request": {

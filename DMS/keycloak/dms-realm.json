@@ -13,7 +13,8 @@
       "serviceAccountsEnabled": false,
       "redirectUris": [
         "http://localhost/*",
-        "http://localhost:4200/*"
+        "http://localhost:4200/*",
+        "https://oauth.pstmn.io/v1/browser-callback"
       ],
       "webOrigins": [
         "http://localhost",
