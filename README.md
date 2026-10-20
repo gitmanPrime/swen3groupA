@@ -1,6 +1,6 @@
 # DMS Project Documentation
 
-## Run the Sprint 2 submission
+## Run the Sprint 3 submission
 
 Prerequisite: Docker Desktop (Linux containers) with Docker Compose. Run these
 commands from the extracted repository root. No local Node.js or .NET SDK is
@@ -29,8 +29,9 @@ to the API container.
 | API health | http://localhost:8081/health |
 | Keycloak admin | http://localhost:8082/admin/ (admin / admin with example settings) |
 | PostgreSQL | localhost:5432 (dms / dms with example settings) |
+| RabbitMQ management | http://localhost:15672 (dms / dms with example settings) |
 
-Ports 80, 5432, 8081, and 8082 must be available. The API applies database
+Ports 80, 5432, 5672, 8081, 8082, and 15672 must be available. The API applies database
 migrations automatically. Database records, uploaded files, and Keycloak state
 persist in Docker volumes. Stop the application without deleting data:
 
@@ -124,6 +125,22 @@ This keeps the domain and business logic independent of infrastructure concerns
 components (e.g. the file storage backend) to be swapped without touching business 
 logic — relevant later in Sprint 4 when local file storage is replaced by MinIO.
 
+### Runtime architecture
+
+```mermaid
+flowchart LR
+    User[User browser] --> Frontend[Angular frontend / nginx]
+    Frontend -->|OIDC login| Keycloak[Keycloak]
+    Frontend -->|Authenticated REST API| API[ASP.NET Core API]
+
+    API --> Postgres[(PostgreSQL)]
+    API --> Files[(Local file storage)]
+    API -->|Publish OcrRequest| Queue[RabbitMQ queue<br/>ocr.documents]
+    Queue -->|Consume and acknowledge| Worker[OCR worker]
+
+    Worker -->|Log document ID and filename| Logs[Container logs]
+```
+
 ### ADR-008: Angular frontend
 The frontend is a separate Angular application in `DMS/frontend`.
 It uses standalone components, Angular Router, and SCSS.
@@ -132,7 +149,7 @@ Components are grouped into feature folders, with shared pages
 under `shared`. Route components are loaded lazily.
 
 This provides a common foundation for parallel frontend development.
-REST API integration and container deployment will follow.
+REST API integration, Keycloak authentication, and container deployment are implemented.
 
 ## Progress
 - Created the layered solution and unit test project.
@@ -145,18 +162,24 @@ REST API integration and container deployment will follow.
 - Sprint 2: Angular dashboard, PDF upload, document details, downloads,
   description editing, deletion, tags, collections, and Keycloak frontend login.
   Docker Compose runs nginx, the API, PostgreSQL, and Keycloak together.
+- Sprint 3: API bearer-token validation, centralized exception handling,
+  RabbitMQ-backed OCR request publishing, and a containerized OCR worker.
+  Uploads publish a document ID and filename to `ocr.documents`; the worker
+  logs and acknowledges each successfully processed message.
 - Frontend installation, development, build, and testing instructions
   are available in [DMS/frontend/README.md](DMS/frontend/README.md).
 
 ## Versioning
 
-We tag the repository after each sprint submission using semantic versioning 
-(`vMAJOR.MINOR.0`), e.g. `v0.1.0` for Sprint 1. Tags mark the exact code state 
-submitted for grading.
+We create an annotated `sprint-N` tag after each sprint submission. Pushing
+that tag triggers the Sprint release workflow, which creates the GitHub release.
+Tags mark the exact code state submitted for grading.
 
 | Tag | Sprint | Description |
 |-----|--------|-------------|
-| v0.1.0 | Sprint 1 | REST API, EF Core persistence, repository pattern, AutoMapper |
+| sprint-1 | Sprint 1 | REST API, EF Core persistence, repository pattern, AutoMapper |
+| sprint-2 | Sprint 2 | Angular frontend, Docker Compose deployment, and Keycloak login |
+| sprint-3 | Sprint 3 | API security, error handling, RabbitMQ OCR queue, and OCR worker |
 
 ### Technology versions (introduced in Sprint 1)
 - .NET 10 SDK 10.0.401, target framework net10.0.
@@ -181,9 +204,8 @@ submitted for grading.
 ## Planned Technologies
 These technologies are planned but are not yet integrated:
 
-- RabbitMQ for asynchronous processing.
 - MinIO for document storage.
-- OCR tooling for extracting document text.
+- OCR text extraction and persistence of extracted results.
 - Elasticsearch for full-text and fuzzy search.
 - A GenAI API for generating summaries.
 
