@@ -288,3 +288,9 @@ We track our work on the [Kanban board](https://github.com/users/gitmanPrime/pro
 - Open a pull request into main and include `Closes #<issue-number>` in its description.
 - Move the issue to Review / Verification and ask another team member to review it.
 - After review, successful checks, and merging, move the issue to Done.
+
+## Lessons Learned
+
+- **Test Architecture Refactoring:** Moving from a single monolithic test project to layer-specific test projects (`DMS.BLL.UnitTests`, `DMS.API.UnitTests`) significantly improved project modularity and aligned the testing structure with our Onion Architecture layers.
+- **Benefits of Onion Architecture:** Strictly adhering to the Dependency Inversion Principle ensures that business logic remains completely independent of frameworks and infrastructure. This not only facilitates unit testing via mocks but also makes future changes (such as replacing local file storage with MinIO) risk-free.
+- **Namespace and Dependency Management during Refactorings:** Splitting test projects highlighted the importance of precise project references to avoid naming conflicts (such as duplicate options classes) and compiler errors.
