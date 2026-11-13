@@ -6,29 +6,75 @@ on:
       - 'sprint-[0-9]+'
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: sprint-release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  release:
+  validate-tag:
+    name: Verify tagged commit is on main
     runs-on: ubuntu-latest
-    env:
-      TAG: ${{ github.ref_name }}
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-
     steps:
-      - name: Ensure tagged commit is on main
+      - name: Check out repository history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check main ancestry
+        shell: bash
         run: |
-          status=$(gh api "repos/$GH_REPO/compare/${GITHUB_SHA}...main" --jq .status)
-          if [ "$status" != "ahead" ] && [ "$status" != "identical" ]; then
-            echo "::error::$TAG must point to a commit on main (status: $status)"
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::$GITHUB_REF_NAME must point to a commit in main"
             exit 1
           fi
 
-      - name: Create release
+  checks:
+    needs: validate-tag
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Publish sprint release
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.ref_name }}
+      GH_REPO: ${{ github.repository }}
+
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Package tracked project files
+        shell: bash
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists"
+          git archive --format=zip \
+            --prefix="dms-${TAG}/" \
+            --output="dms-${TAG}.zip" HEAD
+
+      - name: Upload ZIP and publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          archive="dms-${TAG}.zip"
+
+          if ! release=$(gh release view "$TAG" --json isDraft,assets); then
+            gh release create "$TAG" --verify-tag --title "$TAG" --generate-notes --draft
+            release=$(gh release view "$TAG" --json isDraft,assets)
+          fi
+
+          if [[ "$(jq -r '.isDraft' <<< "$release")" == "true" ]]; then
+            gh release upload "$TAG" "$archive" --clobber
+            gh release edit "$TAG" --draft=false
           else
-            gh release create "$TAG" --verify-tag --title "$TAG" --generate-notes
+            jq -e --arg archive "$archive" \
+              'any(.assets[]; .name == $archive and .state == "uploaded")' \
+              <<< "$release" > /dev/null
           fi

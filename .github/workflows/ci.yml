@@ -1,0 +1,104 @@
+name: DMS CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: DMS/frontend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.14.0'
+          cache: npm
+          cache-dependency-path: DMS/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run tests
+        run: npm test -- --watch=false
+  backend:
+    name: Backend build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.401'
+
+      - name: Restore solution
+        run: dotnet restore DMS/DMS.sln
+
+      - name: Build solution
+        run: dotnet build DMS/DMS.sln --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test DMS/DMS.sln --configuration Release --no-build
+
+  compose:
+    name: Docker Compose build and startup
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      COMPOSE_FILE: DMS/docker-compose.yml
+      COMPOSE_ENV_FILES: DMS/.env.example
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build application images
+        run: docker compose build
+
+      - name: Start the stack
+        run: docker compose up --no-build --wait --wait-timeout 180
+
+      - name: Check frontend, API, and Keycloak
+        shell: bash
+        run: |
+          for url in \
+            http://127.0.0.1/ \
+            http://127.0.0.1:8081/health \
+            http://127.0.0.1:8082/realms/dms/.well-known/openid-configuration
+          do
+            curl --fail --silent --show-error --output /dev/null \
+              --retry 12 --retry-all-errors --retry-delay 5 --max-time 10 "$url"
+          done
+
+      - name: Print Compose logs on failure
+        if: failure()
+        run: |
+          docker compose ps --all
+          docker compose logs --no-color --tail=150
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes

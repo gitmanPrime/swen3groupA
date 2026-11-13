@@ -171,9 +171,9 @@ REST API integration, Keycloak authentication, and container deployment are impl
 
 ## Versioning
 
-We create an annotated `sprint-N` tag after each sprint submission. Pushing
-that tag triggers the Sprint release workflow, which creates the GitHub release.
-Tags mark the exact code state submitted for grading.
+At sprint submission time, create an annotated sprint-N tag on the approved commit 
+from main and push the tag. The Sprint release workflow runs the frontend and backend build 
+and tests and the Docker Compose startup check on the tagged commit.
 
 | Tag | Sprint | Description |
 |-----|--------|-------------|
