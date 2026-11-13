@@ -62,3 +62,43 @@ jobs:
 
       - name: Run unit tests
         run: dotnet test DMS/DMS.sln --configuration Release --no-build
+
+  compose:
+    name: Docker Compose build and startup
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      COMPOSE_FILE: DMS/docker-compose.yml
+      COMPOSE_ENV_FILES: DMS/.env.example
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build application images
+        run: docker compose build
+
+      - name: Start the stack
+        run: docker compose up --no-build --wait --wait-timeout 180
+
+      - name: Check frontend, API, and Keycloak
+        shell: bash
+        run: |
+          for url in \
+            http://127.0.0.1/ \
+            http://127.0.0.1:8081/health \
+            http://127.0.0.1:8082/realms/dms/.well-known/openid-configuration
+          do
+            curl --fail --silent --show-error --output /dev/null \
+              --retry 12 --retry-all-errors --retry-delay 5 --max-time 10 "$url"
+          done
+
+      - name: Print Compose logs on failure
+        if: failure()
+        run: |
+          docker compose ps --all
+          docker compose logs --no-color --tail=150
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes
