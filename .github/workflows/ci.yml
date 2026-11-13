@@ -1,11 +1,12 @@
-name: Frontend CI
+name: DMS CI
 
 on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, feature/angular-setup]
+    branches: [main]
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -39,3 +40,25 @@ jobs:
 
       - name: Run tests
         run: npm test -- --watch=false
+  backend:
+    name: Backend build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.401'
+
+      - name: Restore solution
+        run: dotnet restore DMS/DMS.sln
+
+      - name: Build solution
+        run: dotnet build DMS/DMS.sln --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test DMS/DMS.sln --configuration Release --no-build
