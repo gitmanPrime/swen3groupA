@@ -30,7 +30,7 @@ public class OcrQueuePublisherTests
     public async Task PublishAsync_SendsPersistentJsonToOcrQueue()
     {
         var publisher = CreatePublisher();
-        var request = new OcrRequest(Guid.NewGuid(), "example.pdf");
+        var request = new OcrRequest(Guid.NewGuid(), "example.pdf", "minio/example-key");
         byte[]? body = null;
         _channel.Setup(channel => channel.BasicPublishAsync(
                 It.IsAny<string>(), It.IsAny<string>(), true,

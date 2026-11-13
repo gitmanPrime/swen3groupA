@@ -4,8 +4,7 @@ namespace DMS.BLL.Interfaces.Storage;
 public record StoredFile(string Key);
 
 /// <summary>
-/// Implemented with the local filesystem for Sprint 1;
-/// can be replaced by MinIO in a later sprint without touching business logic :)
+/// Stores and retrieves original document files by their storage key.
 /// </summary>
 public interface IFileStorage
 {

@@ -40,6 +40,12 @@ public class ExceptionHandlingMiddleware
         {
             await WriteProblemAsync(context, StatusCodes.Status503ServiceUnavailable, "Messaging Service Error", ex.Message);
         }
+        catch (FileStorageException ex)
+        {
+            _logger.LogError(ex, "Document storage failed while processing {Method} {Path}",
+                context.Request.Method, context.Request.Path);
+            await WriteProblemAsync(context, StatusCodes.Status503ServiceUnavailable, "Document Storage Unavailable", ex.Message);
+        }
         catch (BadHttpRequestException ex)
         {
             await WriteProblemAsync(context, StatusCodes.Status400BadRequest, "Bad Request", ex.Message);

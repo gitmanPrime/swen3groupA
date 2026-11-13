@@ -1,3 +1,3 @@
 namespace DMS.BLL.Dtos;
 
-public record OcrRequest(Guid DocumentId, string FileName);
+public record OcrRequest(Guid DocumentId, string FileName, string? StorageKey = null);

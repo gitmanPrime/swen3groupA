@@ -1,6 +1,6 @@
 # DMS Project Documentation
 
-## Run the Sprint 3 submission
+## Run the project locally
 
 Prerequisite: Docker Desktop (Linux containers) with Docker Compose. Run these
 commands from the extracted repository root. No local Node.js or .NET SDK is
@@ -14,6 +14,9 @@ docker compose -f DMS/docker-compose.yml up -d --wait
 ```
 
 On Linux/macOS, use `cp DMS/.env.example DMS/.env` for the first command.
+If you already have a `DMS/.env`, add `MINIO_ROOT_USER` and
+`MINIO_ROOT_PASSWORD` to it. The example values are for local assessment.
+Compose builds MinIO from a pinned upstream release.
 Allow Keycloak extra time on first startup; `--wait` does not check its login
 readiness. Inspect startup with `docker compose -f DMS/docker-compose.yml logs keycloak`.
 
@@ -30,8 +33,9 @@ to the API container.
 | Keycloak admin | http://localhost:8082/admin/ (admin / admin with example settings) |
 | PostgreSQL | localhost:5432 (dms / dms with example settings) |
 | RabbitMQ management | http://localhost:15672 (dms / dms with example settings) |
+| MinIO console | http://localhost:9090 (credentials from `DMS/.env`) |
 
-Ports 80, 5432, 5672, 8081, 8082, and 15672 must be available. The API applies database
+Ports 80, 5432, 5672, 8081, 8082, 9000, 9090, and 15672 must be available. The API applies database
 migrations automatically. Database records, uploaded files, and Keycloak state
 persist in Docker volumes. Stop the application without deleting data:
 
@@ -123,7 +127,7 @@ graph TD
 This keeps the domain and business logic independent of infrastructure concerns 
 (database, web framework), making them easier to test and allowing infrastructure 
 components (e.g. the file storage backend) to be swapped without touching business 
-logic — relevant later in Sprint 4 when local file storage is replaced by MinIO.
+logic. MinIO uses the existing `IFileStorage` interface.
 
 ### Runtime architecture
 
@@ -134,7 +138,7 @@ flowchart LR
     Frontend -->|Authenticated REST API| API[ASP.NET Core API]
 
     API --> Postgres[(PostgreSQL)]
-    API --> Files[(Local file storage)]
+    API --> Files[(MinIO)]
     API -->|Publish OcrRequest| Queue[RabbitMQ queue<br/>ocr.documents]
     Queue -->|Consume and acknowledge| Worker[OCR worker]
 
@@ -166,6 +170,11 @@ REST API integration, Keycloak authentication, and container deployment are impl
   RabbitMQ-backed OCR request publishing, and a containerized OCR worker.
   Uploads publish a document ID and filename to `ocr.documents`; the worker
   logs and acknowledges each successfully processed message.
+- Sprint 4 (S4-01): new uploads go to the private `documents` bucket, which is
+  created on the first upload. PostgreSQL keeps the metadata and object key.
+  The OCR message includes that same key so a worker can read the object
+  from `http://minio:9000` with MinIO credentials. Existing uploads remain
+  available through the API from the `dms_data` volume.
 - Frontend installation, development, build, and testing instructions
   are available in [DMS/frontend/README.md](DMS/frontend/README.md).
 
@@ -204,7 +213,6 @@ and tests and the Docker Compose startup check on the tagged commit.
 ## Planned Technologies
 These technologies are planned but are not yet integrated:
 
-- MinIO for document storage.
 - OCR text extraction and persistence of extracted results.
 - Elasticsearch for full-text and fuzzy search.
 - A GenAI API for generating summaries.

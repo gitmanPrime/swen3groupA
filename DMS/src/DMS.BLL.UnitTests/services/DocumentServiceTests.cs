@@ -76,8 +76,26 @@ public class DocumentServiceTests
         _documents.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
 
         _ocrPublisher.Verify(p => p.PublishAsync(
-            It.Is<OcrRequest>(req => req.DocumentId == result.Id && req.FileName == "report.pdf"),
+            It.Is<OcrRequest>(req => req.DocumentId == result.Id && req.FileName == "report.pdf" &&
+                req.StorageKey == "generated-key"),
             It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Upload_StorageFails_SkipsMetadataAndOcr()
+    {
+        using var stream = Content();
+        var storageError = new FileStorageException("Could not store the document.", new IOException());
+        _storage.Setup(s => s.SaveAsync(stream, "report.pdf", It.IsAny<CancellationToken>()))
+            .ThrowsAsync(storageError);
+
+        var exception = await Assert.ThrowsAsync<FileStorageException>(() =>
+            CreateSut().UploadAsync("report.pdf", "application/pdf", stream.Length, stream, null));
+
+        Assert.Same(storageError, exception);
+        _documents.Verify(d => d.AddAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()), Times.Never);
+        _documents.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        _ocrPublisher.Verify(p => p.PublishAsync(It.IsAny<OcrRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

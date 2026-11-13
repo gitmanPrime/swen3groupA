@@ -66,7 +66,7 @@ public class DocumentService : IDocumentService
 
         try
         {
-            var ocrRequest = new OcrRequest(document.Id, document.FileName);
+            var ocrRequest = new OcrRequest(document.Id, document.FileName, document.StorageKey);
             await _ocrPublisher.PublishAsync(ocrRequest, cancellationToken);
         }
         catch (MessagingException)
