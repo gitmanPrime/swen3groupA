@@ -1,3 +1,8 @@
+x-file-storage: &file-storage
+  FileStorage__Endpoint: http://minio:9000
+  FileStorage__AccessKey: ${MINIO_ROOT_USER}
+  FileStorage__SecretKey: ${MINIO_ROOT_PASSWORD}
+
 services:
   rabbitmq:
     image: rabbitmq:4-management
@@ -64,13 +69,11 @@ services:
       minio:
         condition: service_healthy
     environment:
+      <<: *file-storage
       ConnectionStrings__Postgres: "Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       RabbitMQ__HostName: rabbitmq
       RabbitMQ__UserName: ${RABBITMQ_USER}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
-      FileStorage__Endpoint: http://minio:9000
-      FileStorage__AccessKey: ${MINIO_ROOT_USER}
-      FileStorage__SecretKey: ${MINIO_ROOT_PASSWORD}
       Authentication__MetadataAddress: "http://keycloak:8080/realms/dms/.well-known/openid-configuration"
     volumes:
       - dms_data:/app/App_Data
@@ -83,12 +86,15 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__UserName=${RABBITMQ_USER:-dms}
-      - RabbitMQ__Password=${RABBITMQ_PASSWORD:-dms}
-      - RabbitMQ__QueueName=ocr.documents
+      <<: *file-storage
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER:-dms}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD:-dms}
+      RabbitMQ__QueueName: ocr.documents
     restart: unless-stopped
 
   dms-frontend:

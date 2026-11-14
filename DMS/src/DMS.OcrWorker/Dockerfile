@@ -5,6 +5,7 @@ WORKDIR /src
 # Copying and restoring Project Files
 COPY ["src/DMS.OcrWorker/DMS.OcrWorker.csproj", "src/DMS.OcrWorker/"]
 COPY ["src/DMS.BLL/DMS.BLL.csproj", "src/DMS.BLL/"]
+COPY ["src/DMS.DAL/DMS.DAL.csproj", "src/DMS.DAL/"]
 COPY ["src/DMS.Domain/DMS.Domain.csproj", "src/DMS.Domain/"]
 RUN dotnet restore "src/DMS.OcrWorker/DMS.OcrWorker.csproj"
 

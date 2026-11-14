@@ -1,10 +1,11 @@
+using DMS.DAL;
 using DMS.OcrWorker;
-using RabbitMQ.Client;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         services.Configure<RabbitMqOptions>(context.Configuration.GetSection("RabbitMQ"));
+        services.AddFileStorage(context.Configuration);
         services.AddHostedService<OcrWorker>();
     })
     .Build();
