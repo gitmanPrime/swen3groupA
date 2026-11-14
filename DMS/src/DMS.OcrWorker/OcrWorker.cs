@@ -1,4 +1,5 @@
 using DMS.BLL.Dtos;
+using DMS.BLL.Interfaces.Storage;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,9 +10,10 @@ using System.Threading.Channels;
 
 namespace DMS.OcrWorker
 {
-    public class OcrWorker(IOptions<RabbitMqOptions> options, ILogger<OcrWorker> logger) : BackgroundService
+    public class OcrWorker(IOptions<RabbitMqOptions> options, ILogger<OcrWorker> logger, IServiceScopeFactory serviceScopeFactory) : BackgroundService
     {
         private readonly RabbitMqOptions _options = options.Value;
+        private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             logger.LogInformation("OCR Worker is starting...");
@@ -61,6 +63,7 @@ namespace DMS.OcrWorker
             var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.ReceivedAsync += async (sender, ea) =>
             {
+                using var scope = _serviceScopeFactory.CreateScope();
                 OcrRequest? ocrRequest = null;
                 try
                 {
@@ -68,11 +71,25 @@ namespace DMS.OcrWorker
                     ocrRequest = JsonSerializer.Deserialize<OcrRequest>(body);
 
                     if (ocrRequest is null)
+                    {
                         throw new JsonException("OCR request must not be null.");
+                    }
 
                     logger.LogInformation(
                         "Received OCR request for document {DocumentId} from queue {QueueName} (delivery {DeliveryTag})",
                         ocrRequest.DocumentId, _options.QueueName, ea.DeliveryTag);
+
+                    var fileStorage = scope.ServiceProvider.GetRequiredService<IFileStorage>();
+                    
+                    // load pdf as stream using the DocumentID
+                    using var pdfStream = await fileStorage.OpenReadAsync(ocrRequest.StorageKey, stoppingToken);
+
+                    if (pdfStream is null)
+                    {
+                        throw new FileNotFoundException($"Document with key {ocrRequest.StorageKey} could not be found in file storage.");
+                    }
+
+                    logger.LogInformation("Successfully retrieved PDF stream for document {DocumentId} from storage.", ocrRequest.DocumentId);
 
                     await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
                 }
@@ -81,6 +98,7 @@ namespace DMS.OcrWorker
                     logger.LogError(ex,
                         "Failed to process OCR message for document {DocumentId} from queue {QueueName} (delivery {DeliveryTag})",
                         ocrRequest?.DocumentId, _options.QueueName, ea.DeliveryTag);
+
                     await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
                 }
             };
