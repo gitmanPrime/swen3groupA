@@ -14,6 +14,7 @@ public class ExceptionHandlingMiddlewareTests
         [new ConflictException("Already exists."), 409, "Conflict"],
         [new ValidationException("fileName", "Required."), 400, "Validation Failed"],
         [new MessagingException("RabbitMQ is unavailable."), 503, "Messaging Service Error"],
+        [new FileStorageException("Could not store the document.", new IOException()), 503, "Document Storage Unavailable"],
         [new BadHttpRequestException("Malformed request."), 400, "Bad Request"]
     ];
 
