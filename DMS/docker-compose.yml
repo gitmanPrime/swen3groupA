@@ -120,9 +120,56 @@ services:
       - keycloak_data:/opt/keycloak/data
       - ./keycloak:/opt/keycloak/data/import:ro
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.6
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      node.store.allow_mmap: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "127.0.0.1:9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  elasticsearch-init:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.6
+    profiles: ["setup"]
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      Elasticsearch__Url: "${ELASTICSEARCH_URL:-http://elasticsearch:9200}"
+      Elasticsearch__IndexName: "${ELASTICSEARCH_INDEX_NAME:-dms-documents}"
+    volumes:
+      - ./elasticsearch/documents-index.json:/opt/dms/documents-index.json:ro
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        index_url="$${Elasticsearch__Url%/}/$${Elasticsearch__IndexName}"
+        status=$$(curl -sS --max-time 10 --head --output /dev/null \
+          --write-out '%{http_code}' "$$index_url")
+
+        case "$$status" in
+          200) echo "Index already exists: $$index_url" ;;
+          404)
+            curl -fsS --max-time 30 --request PUT \
+              --header 'Content-Type: application/json' \
+              --data-binary @/opt/dms/documents-index.json "$$index_url"
+            ;;
+          *) echo "Index check failed with HTTP $$status: $$index_url" >&2; exit 1 ;;
+        esac
+
 volumes:
   rabbitmq_data:
   pgdata:
   dms_data:
   minio_data:
   keycloak_data:
+  elasticsearch_data:
