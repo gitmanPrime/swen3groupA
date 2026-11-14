@@ -34,8 +34,9 @@ to the API container.
 | PostgreSQL | localhost:5432 (dms / dms with example settings) |
 | RabbitMQ management | http://localhost:15672 (dms / dms with example settings) |
 | MinIO console | http://localhost:9090 (credentials from `DMS/.env`) |
+| Elasticsearch | http://127.0.0.1:9200 |
 
-Ports 80, 5432, 5672, 8081, 8082, 9000, 9090, and 15672 must be available. The API applies database
+Ports 80, 5432, 5672, 8081, 8082, 9000, 9090, 9200, and 15672 must be available. The API applies database
 migrations automatically. Database records, uploaded files, and Keycloak state
 persist in Docker volumes. Stop the application without deleting data:
 
@@ -48,6 +49,25 @@ login and logout. The API validates Keycloak access tokens. Document, tag,
 and collection endpoints require authentication; missing or invalid tokens
 return 401. See [how-to-start.txt](how-to-start.txt) for startup and local
 development instructions.
+
+### Initialize the Elasticsearch document index
+
+From the repository root, run:
+
+```powershell
+docker compose --env-file DMS/.env -f DMS/docker-compose.yml run --rm elasticsearch-init
+```
+
+The initializer waits for Elasticsearch to become healthy and creates the
+`dms-documents` index using [documents-index.json](DMS/elasticsearch/documents-index.json).
+If the index already exists, the initializer exits successfully and preserves
+its contents.
+
+Set `ELASTICSEARCH_URL` and `ELASTICSEARCH_INDEX_NAME` in `DMS/.env` to override
+the defaults. Compose passes these settings to the initializer as
+`Elasticsearch__Url` and `Elasticsearch__IndexName`. The default URL inside
+Compose is `http://elasticsearch:9200`. From the host, use
+`http://127.0.0.1:9200`.
 
 ## Contributors
  - **at-fhtw** - Abdulah Tepsurkaev (if24b293)
@@ -212,9 +232,8 @@ and tests and the Docker Compose startup check on the tagged commit.
 
 ## Planned Technologies
 These technologies are planned but are not yet integrated:
-
 - OCR text extraction and persistence of extracted results.
-- Elasticsearch for full-text and fuzzy search.
+- Full-text and fuzzy search in the application.
 - A GenAI API for generating summaries.
 
 ## Local authentication server
