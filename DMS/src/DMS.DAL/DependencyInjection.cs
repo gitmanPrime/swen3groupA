@@ -26,6 +26,17 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString, npgsql =>
                 npgsql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
+        services.AddFileStorage(configuration);
+
+        services.AddScoped<IDocumentRepository, DocumentRepository>();
+        services.AddScoped<ICollectionRepository, CollectionRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddFileStorage(this IServiceCollection services, IConfiguration configuration)
+    {
         services.AddOptions<FileStorageOptions>()
             .Bind(configuration.GetSection(FileStorageOptions.SectionName))
             .Validate(o => Uri.TryCreate(o.Endpoint, UriKind.Absolute, out var uri) &&
@@ -50,10 +61,6 @@ public static class DependencyInjection
         });
         services.AddScoped<LocalFileStorage>();
         services.AddScoped<IFileStorage, MinioFileStorage>();
-
-        services.AddScoped<IDocumentRepository, DocumentRepository>();
-        services.AddScoped<ICollectionRepository, CollectionRepository>();
-        services.AddScoped<ITagRepository, TagRepository>();
 
         return services;
     }
