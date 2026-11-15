@@ -30,6 +30,13 @@ namespace DMS.OcrWorker
                 ClientProvidedName = "dms-ocr-worker"
             };
 
+            if (string.IsNullOrWhiteSpace(_options.ResultQueueName) ||
+                string.Equals(_options.QueueName, _options.ResultQueueName, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "RabbitMQ requires a result queue distinct from the OCR request queue.");
+            }
+
             IConnection? connection = null;
             IChannel? channel = null;
 
@@ -43,10 +50,21 @@ namespace DMS.OcrWorker
                         connection = await factory.CreateConnectionAsync(stoppingToken);
 
                         channel = await connection.CreateChannelAsync(
+                            new CreateChannelOptions(
+                                publisherConfirmationsEnabled: true,
+                                publisherConfirmationTrackingEnabled: true),
                             cancellationToken: stoppingToken);
 
                         await channel.QueueDeclareAsync(
                             queue: _options.QueueName,
+                            durable: true,
+                            exclusive: false,
+                            autoDelete: false,
+                            arguments: null,
+                            cancellationToken: stoppingToken);
+
+                        await channel.QueueDeclareAsync(
+                            queue: _options.ResultQueueName,
                             durable: true,
                             exclusive: false,
                             autoDelete: false,
@@ -186,6 +204,20 @@ namespace DMS.OcrWorker
                                 "OCR produced no text for document {DocumentId}.",
                                 ocrRequest.DocumentId);
                         }
+
+                        var result = new OcrResult(ocrRequest.DocumentId, extractedText);
+
+                        await channel.BasicPublishAsync(
+                            exchange: string.Empty,
+                            routingKey: _options.ResultQueueName,
+                            mandatory: true,
+                            basicProperties: new BasicProperties
+                            {
+                                ContentType = "application/json",
+                                Persistent = true
+                            },
+                            body: JsonSerializer.SerializeToUtf8Bytes(result),
+                            cancellationToken: stoppingToken);
 
                         await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
                     }
@@ -395,7 +427,10 @@ namespace DMS.OcrWorker
                         $"Tesseract failed with exit code {process.ExitCode}: {errorOutput}");
                 }
 
-                extractedPages.Add($"--- Page {i + 1} ---\n{pageText}");
+                if (!string.IsNullOrWhiteSpace(pageText))
+                {
+                    extractedPages.Add(pageText.Trim());
+                }
             }
 
             return string.Join("\n\n", extractedPages);
