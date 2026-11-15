@@ -151,8 +151,14 @@ namespace DMS.OcrWorker
                             .GetRequiredService<IFileStorage>();
 
                         // Retrieve PDF from storage
+                        var storageKey = ocrRequest.StorageKey;
+                        if (string.IsNullOrWhiteSpace(storageKey))
+                        {
+                            throw new JsonException("OCR request must contain a storage key.");
+                        }
+
                         using var pdfStream = await fileStorage.OpenReadAsync(
-                            ocrRequest.StorageKey,
+                            storageKey,
                             stoppingToken);
 
                         if (pdfStream is null)
