@@ -17,4 +17,6 @@ public interface IDocumentRepository
     void Remove(Document document);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Document>> GetByIdsAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken);
 }

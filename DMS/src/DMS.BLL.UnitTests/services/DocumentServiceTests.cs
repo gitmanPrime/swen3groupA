@@ -32,7 +32,8 @@ public class DocumentServiceTests
         _storage.Object,
         _ocrPublisher.Object,
         CreateMapper(),
-        NullLogger<DocumentService>.Instance);
+        NullLogger<DocumentService>.Instance,
+        Mock.Of<IDocumentSearchIndex>());
 
     private static MemoryStream Content(string text = "hello") => new(System.Text.Encoding.UTF8.GetBytes(text));
 

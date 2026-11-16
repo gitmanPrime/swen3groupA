@@ -20,8 +20,9 @@ public class DocumentService : IDocumentService
     private readonly IMapper _mapper;
     private readonly ILogger<DocumentService> _logger;
     private readonly IOcrQueuePublisher _ocrPublisher;
+    private readonly IDocumentSearchIndex _searchIndex;
 
-    public DocumentService(IDocumentRepository documents, ICollectionRepository collections, ITagRepository tags, IFileStorage storage, IOcrQueuePublisher ocrPublisher, IMapper mapper, ILogger<DocumentService> logger)
+    public DocumentService(IDocumentRepository documents, ICollectionRepository collections, ITagRepository tags, IFileStorage storage, IOcrQueuePublisher ocrPublisher, IMapper mapper, ILogger<DocumentService> logger, IDocumentSearchIndex searchIndex)
     {
         _documents = documents;
         _collections = collections;
@@ -30,6 +31,7 @@ public class DocumentService : IDocumentService
         _ocrPublisher = ocrPublisher;
         _mapper = mapper;
         _logger = logger;
+        _searchIndex = searchIndex;
     }
 
     // upload a document
@@ -93,6 +95,30 @@ public class DocumentService : IDocumentService
 
         var documents = await _documents.GetAllAsync(collectionId, tagId, cancellationToken);
         return documents.Select(ToDto).ToList();
+    }
+
+    public async Task<IReadOnlyList<DocumentDto>> SearchAsync(
+    string? query, CancellationToken cancellationToken)
+    {
+        var term = query?.Trim();
+        if (string.IsNullOrEmpty(term))
+            throw new ValidationException("q", "Enter a search term.");
+
+        var ids = await _searchIndex.SearchIdsAsync(term, cancellationToken);
+        if (ids.Count == 0)
+            return [];
+
+        var documents = await _documents.GetByIdsAsync(ids, cancellationToken);
+        var documentsById = documents.ToDictionary(document => document.Id);
+        var results = new List<DocumentDto>();
+
+        foreach (var id in ids.Distinct())
+        {
+            if (documentsById.TryGetValue(id, out var document))
+                results.Add(ToDto(document));
+        }
+
+        return results;
     }
 
     // get document metadata (by id)

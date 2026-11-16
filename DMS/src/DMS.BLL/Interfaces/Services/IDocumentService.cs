@@ -11,6 +11,7 @@ public interface IDocumentService
     Task<DocumentDto> UploadAsync(string fileName, string contentType, long fileSize, Stream content, string? description, CancellationToken cancellationToken = default);
     // list documents (with optional collectionid and tagid filters)
     Task<IReadOnlyList<DocumentDto>> ListAsync(Guid? collectionId = null, Guid? tagId = null, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<DocumentDto>> SearchAsync(string? query, CancellationToken cancellationToken);
     // get document metadata (by id)
     Task<DocumentDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     // download the original file (by id)
