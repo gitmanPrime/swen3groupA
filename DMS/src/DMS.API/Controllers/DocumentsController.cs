@@ -50,6 +50,13 @@ public class DocumentsController(IDocumentService documents) : ControllerBase
         return Ok(await documents.ListAsync(collectionId, tagId, cancellationToken));
     }
 
+    [HttpGet("search")]
+    public async Task<ActionResult<IReadOnlyList<DocumentDto>>> Search(
+    [FromQuery] string? q, CancellationToken cancellationToken)
+    {
+        return Ok(await documents.SearchAsync(q, cancellationToken));
+    }
+
     /// <summary>Retrieves the metadata of a document.</summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(DocumentDto), StatusCodes.Status200OK)]

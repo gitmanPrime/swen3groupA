@@ -19,6 +19,16 @@ public class DocumentRepository(DmsDbContext dbContext) : IDocumentRepository
         return await BaseQuery.FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Document>> GetByIdsAsync(
+    IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
+    {
+        var documentIds = ids.ToArray();
+        return await BaseQuery
+            .Where(document => documentIds.Contains(document.Id))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Document>> GetAllAsync(Guid? collectionId = null, Guid? tagId = null, CancellationToken cancellationToken = default)
     {
         IQueryable<Document> query = BaseQuery;
