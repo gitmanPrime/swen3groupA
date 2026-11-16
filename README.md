@@ -50,6 +50,21 @@ and collection endpoints require authentication; missing or invalid tokens
 return 401. See [how-to-start.txt](how-to-start.txt) for startup and local
 development instructions.
 
+### Verify Sprint 4 OCR search
+
+1. Open http://localhost/ and log in with `student` / `student`.
+2. Select **Upload PDF** and upload `HelloWorld.pdf`. The PDF should contain
+   the word `Hello` on the page.
+3. Return to **Documents**, enter `Hello` in **Search document contents**,
+   and select **Search**. The results should include `HelloWorld.pdf`.
+   If it does not appear immediately, wait a few seconds and search again.
+
+If the document still does not appear, check the OCR and indexing worker logs.
+
+```powershell
+docker compose -f DMS/docker-compose.yml logs --tail=100 ocr-worker indexing-worker
+```
+
 ### Document indexing
 
 Docker Compose runs `elasticsearch-init` before starting the indexing worker.
@@ -197,15 +212,17 @@ REST API integration, Keycloak authentication, and container deployment are impl
 
 ## Versioning
 
-At sprint submission time, create an annotated sprint-N tag on the approved commit 
-from main and push the tag. The Sprint release workflow runs the frontend and backend build 
-and tests and the Docker Compose startup check on the tagged commit.
+At sprint submission time, create an annotated `sprint-N` tag on the approved
+commit from `main` and push the tag. The Sprint release workflow runs frontend
+and backend builds and tests, plus a Docker Compose startup check. When those
+checks pass, it publishes `dms-sprint-N.zip` under the GitHub release for the tag.
 
 | Tag | Sprint | Description |
 |-----|--------|-------------|
 | sprint-1 | Sprint 1 | REST API, EF Core persistence, repository pattern, AutoMapper |
 | sprint-2 | Sprint 2 | Angular frontend, Docker Compose deployment, and Keycloak login |
 | sprint-3 | Sprint 3 | API security, error handling, RabbitMQ OCR queue, and OCR worker |
+| sprint-4 | Sprint 4 | MinIO document storage, PDF OCR, Elasticsearch indexing, and document content search |
 
 ### Technology versions (introduced in Sprint 1)
 - .NET 10 SDK 10.0.401, target framework net10.0.
@@ -229,8 +246,6 @@ and tests and the Docker Compose startup check on the tagged commit.
 
 ## Planned Technologies
 These technologies are planned but are not yet integrated:
-- OCR text extraction and persistence of extracted results.
-- Full-text and fuzzy search in the application.
 - A GenAI API for generating summaries.
 
 ## Local authentication server
