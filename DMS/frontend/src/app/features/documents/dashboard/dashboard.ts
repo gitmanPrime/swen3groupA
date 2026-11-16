@@ -17,16 +17,28 @@ export class Dashboard implements OnInit {
   readonly documents = signal<Document[]>([]);
   readonly loading = signal(true);
   readonly error = signal('');
+  readonly searchTerm = signal('');
 
   ngOnInit() {
-    // fetch the document list once when the component is created
-    this.api.list().subscribe({
+    this.loadDocuments();
+  }
+
+  loadDocuments(query = '') {
+    const term = query.trim();
+    this.searchTerm.set(term);
+    this.loading.set(true);
+    this.error.set('');
+
+    const request = term ? this.api.search(term) : this.api.list();
+    request.subscribe({
       next: (documents) => {
         this.documents.set(documents);
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Could not load documents. Please try again later.');
+        this.error.set(term
+          ? 'Could not search documents. Please try again.'
+          : 'Could not load documents. Please try again later.');
         this.loading.set(false);
       },
     });

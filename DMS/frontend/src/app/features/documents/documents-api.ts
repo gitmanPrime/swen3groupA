@@ -18,6 +18,12 @@ export interface Document {
 export class DocumentsApi {
   private readonly http = inject(HttpClient);
 
+  search(query: string) {
+    return this.http.get<Document[]>('/api/documents/search', {
+      params: { q: query },
+    });
+  }
+
   list() {
     return this.http.get<Document[]>('/api/documents');
   }

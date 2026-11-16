@@ -75,6 +75,8 @@ services:
       RabbitMQ__UserName: ${RABBITMQ_USER}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
       Authentication__MetadataAddress: "http://keycloak:8080/realms/dms/.well-known/openid-configuration"
+      Elasticsearch__Url: "${ELASTICSEARCH_URL:-http://elasticsearch:9200}"
+      Elasticsearch__IndexName: "${ELASTICSEARCH_INDEX_NAME:-dms-documents}"
     volumes:
       - dms_data:/app/App_Data
 

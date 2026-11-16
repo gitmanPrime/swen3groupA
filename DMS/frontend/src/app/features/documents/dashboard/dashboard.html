@@ -21,6 +21,25 @@
   </div>
 </div>
 
+<form class="mb-4" (submit)="$event.preventDefault(); loadDocuments(query.value)">
+  <fieldset class="flex flex-wrap items-end gap-2" [disabled]="loading()">
+    <div>
+      <label for="document-search" class="block text-sm font-medium">
+        Search document contents
+      </label>
+      <input #query id="document-search" type="search"
+             class="rounded-lg border border-slate-300 px-3 py-2">
+    </div>
+    <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-white">
+      Search
+    </button>
+    <button type="button" class="rounded-lg border border-slate-300 px-3 py-2"
+            (click)="query.value = ''; loadDocuments()">
+      Clear
+    </button>
+  </fieldset>
+</form>
+
 <!-- Skeleton placeholder shown while the document list is loading -->
 @if (loading()) {
   <div class="w-full rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden animate-pulse">
@@ -41,7 +60,7 @@
       <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
     <div>
-      <span class="font-semibold">Couldn't load documents:</span> {{ error() }}
+      {{ error() }}
     </div>
   </div>
 }
@@ -84,6 +103,9 @@
             <!-- Empty state: no documents have been uploaded yet -->
             <tr>
               <td colspan="2" class="px-6 py-12 text-center">
+                @if (searchTerm()) {
+                <h3 class="text-sm font-semibold text-slate-900">No matching documents</h3>
+                } @else {
                 <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400 mb-4 border border-slate-200">
                   <svg xmlns="http://www.w3.org" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.008 1.24l.885 1.77a2.25 2.25 0 0 0 2.007 1.24h1.98a2.25 2.25 0 0 0 2.007-1.24l.885-1.77a2.25 2.25 0 0 1 2.007-1.24h3.86m-18 0h18m-18 0v-2.25A2.25 2.25 0 0 1 4.5 7.5h15a2.25 2.25 0 0 1 2.25 2.25V13.5m-18 0V18A2.25 2.25 0 0 0 4.5 20.25h15A2.25 2.25 0 0 0 21 18v-4.5m-9-9h.008v.008H12V4.5ZM15 4.5h.008v.008H15V4.5Z" />
@@ -94,6 +116,7 @@
                 <a routerLink="/documents/upload" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline">
                   Upload your first file
                 </a>
+                }
               </td>
             </tr>
           }

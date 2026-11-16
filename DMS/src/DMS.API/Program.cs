@@ -6,6 +6,8 @@ using DMS.DAL;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using DMS.BLL.Interfaces.Repositories;
+using DMS.DAL.Search;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +51,15 @@ builder.Services.AddSingleton<IOcrQueuePublisher>(provider => new OcrQueuePublis
 // Application layers
 builder.Services.AddBusinessLogic();
 builder.Services.AddDataAccess(builder.Configuration);
+
+builder.Services.AddHttpClient<IDocumentSearchIndex, ElasticsearchDocumentSearchIndex>(client =>
+{
+    var url = builder.Configuration["Elasticsearch:Url"] ?? "http://127.0.0.1:9200";
+    var index = builder.Configuration["Elasticsearch:IndexName"] ?? "dms-documents";
+
+    client.BaseAddress = new Uri($"{url.TrimEnd('/')}/{Uri.EscapeDataString(index)}/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 var app = builder.Build();
 
