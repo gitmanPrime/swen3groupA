@@ -1,4 +1,4 @@
-Sprint 2 - full Docker setup (recommended)
+DMS - full Docker setup (recommended)
 
 Prerequisite: Docker Desktop running with Linux containers.
 From the extracted repository root, copy the example settings if there is no
@@ -18,6 +18,8 @@ Keycloak admin: http://localhost:8082/admin/ (admin / admin with example setting
 Use Upload to add a PDF, Documents to see the dashboard, and a filename to
 open details. Requests pass through nginx to the backend. Database migrations
 run automatically. Document, tag, and collection endpoints require a valid Keycloak access token.
+
+For the upload and OCR search check, see "Verify Sprint 4 OCR search" in README.md.
 
 Stop without deleting stored data:
 docker compose -f DMS/docker-compose.yml stop
@@ -46,7 +48,7 @@ set ConnectionStrings__Postgres accordingly; dotnet run does not load .env.
 Swagger: http://localhost:8081/swagger (Development environment only).
 
 Tests (from repository root):
-dotnet test DMS/src/DMS.UnitTests/DMS.UnitTests.csproj
+dotnet test DMS/DMS.sln
 Set-Location DMS/frontend
 npm ci
 npm test -- --watch=false
