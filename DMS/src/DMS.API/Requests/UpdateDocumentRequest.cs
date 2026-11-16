@@ -1,4 +1,4 @@
-namespace DMS.BLL.Dtos;
+namespace DMS.API.Requests;
 
 /// <summary>
 /// This is for PATCH /api/documents/{id}

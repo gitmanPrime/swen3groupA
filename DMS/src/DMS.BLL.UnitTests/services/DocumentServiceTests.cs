@@ -210,7 +210,7 @@ public class DocumentServiceTests
         var document = NewDocument();
         _documents.Setup(d => d.GetByIdAsync(document.Id, It.IsAny<CancellationToken>())).ReturnsAsync(document);
 
-        var result = await CreateSut().UpdateAsync(document.Id, new UpdateDocumentRequest { Description = "New description" });
+        var result = await CreateSut().UpdateAsync(document.Id, description: "New description");
 
         Assert.Equal("New description", result.Description);
         _documents.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -227,7 +227,7 @@ public class DocumentServiceTests
         _collections.Setup(c => c.GetByIdAsync(first, It.IsAny<CancellationToken>())).ReturnsAsync(new Collection("A"));
         _collections.Setup(c => c.GetByIdAsync(second, It.IsAny<CancellationToken>())).ReturnsAsync(new Collection("B"));
 
-        var result = await CreateSut().UpdateAsync(document.Id, new UpdateDocumentRequest { CollectionIds = [first, second] });
+        var result = await CreateSut().UpdateAsync(document.Id, collectionIds: [first, second]);
 
         Assert.Equal(2, result.CollectionIds.Count);
         Assert.Contains(first, result.CollectionIds);

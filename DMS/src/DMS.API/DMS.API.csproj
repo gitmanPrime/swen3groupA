@@ -22,8 +22,4 @@
     <ProjectReference Include="..\DMS.DAL\DMS.DAL.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>

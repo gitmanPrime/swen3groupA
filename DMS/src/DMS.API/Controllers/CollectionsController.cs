@@ -2,6 +2,7 @@ using DMS.BLL.Dtos;
 using DMS.BLL.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using DMS.API.Requests;
 
 namespace DMS.API.Controllers;
 
@@ -14,7 +15,7 @@ public class CollectionsController(ICollectionService collections) : ControllerB
     [HttpPost]
     [ProducesResponseType(typeof(CollectionDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<CollectionDto>> Create(CreateCollectionRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<CollectionDto>> Create([FromBody] CreateCollectionRequest request, CancellationToken cancellationToken)
     {
         var collection = await collections.CreateAsync(request.Name, request.Description, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = collection.Id }, collection);
@@ -42,7 +43,7 @@ public class CollectionsController(ICollectionService collections) : ControllerB
     [ProducesResponseType(typeof(CollectionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CollectionDto>> Rename(Guid id, RenameCollectionRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<CollectionDto>> Rename(Guid id, [FromBody] RenameCollectionRequest request, CancellationToken cancellationToken)
     {
         return Ok(await collections.RenameAsync(id, request.Name, cancellationToken));
     }

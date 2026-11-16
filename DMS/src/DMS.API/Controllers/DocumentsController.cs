@@ -2,6 +2,7 @@ using DMS.BLL.Dtos;
 using DMS.BLL.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using DMS.API.Requests;
 
 namespace DMS.API.Controllers;
 
@@ -81,9 +82,11 @@ public class DocumentsController(IDocumentService documents) : ControllerBase
     [ProducesResponseType(typeof(DocumentDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DocumentDto>> Update(Guid id, UpdateDocumentRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<DocumentDto>> Update(Guid id, [FromBody] UpdateDocumentRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await documents.UpdateAsync(id, request, cancellationToken));
+        var updatedDocument = await documents.UpdateAsync(id, request.Description, request.CollectionIds, cancellationToken);
+
+        return Ok(updatedDocument);
     }
 
     /// <summary>Deletes a document and its stored file.</summary>
