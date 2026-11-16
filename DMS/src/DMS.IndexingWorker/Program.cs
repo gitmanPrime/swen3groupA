@@ -15,4 +15,6 @@ builder.Services.AddSingleton(_ => new HttpClient
 });
 builder.Services.AddSingleton<ElasticsearchDocumentWriter>();
 
+builder.Services.AddHostedService<IndexingWorker>();
+
 await builder.Build().RunAsync();
