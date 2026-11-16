@@ -2,6 +2,7 @@ using DMS.BLL.Dtos;
 using DMS.BLL.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using DMS.API.Requests;
 
 namespace DMS.API.Controllers;
 
@@ -15,7 +16,7 @@ public class TagsController(ITagService tags) : ControllerBase
     [ProducesResponseType(typeof(TagDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<TagDto>> Create(CreateTagRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<TagDto>> Create([FromBody] CreateTagRequest request, CancellationToken cancellationToken)
     {
         var tag = await tags.CreateAsync(request.Name, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, tag);

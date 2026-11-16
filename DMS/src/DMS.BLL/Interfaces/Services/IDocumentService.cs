@@ -16,7 +16,7 @@ public interface IDocumentService
     // download the original file (by id)
     Task<FileDownload> DownloadAsync(Guid id, CancellationToken cancellationToken = default);
     // update document data (by id)
-    Task<DocumentDto> UpdateAsync(Guid id, UpdateDocumentRequest request, CancellationToken cancellationToken = default);
+    Task<DocumentDto> UpdateAsync(Guid id, string? description = null, IReadOnlyList<Guid>? collectionIds = null, CancellationToken cancellationToken = default);
     // delete a document (by id)
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     // assign a tag

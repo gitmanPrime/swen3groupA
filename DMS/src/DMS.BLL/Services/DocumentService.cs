@@ -120,18 +120,15 @@ public class DocumentService : IDocumentService
     }
 
     // update document data (by id)
-    public async Task<DocumentDto> UpdateAsync(Guid id, UpdateDocumentRequest request, CancellationToken cancellationToken = default)
+    public async Task<DocumentDto> UpdateAsync(Guid id, string? description = null, IReadOnlyList<Guid>? collectionIds = null, CancellationToken cancellationToken = default)
     {
-        if (request is null)
-            throw new ValidationException("Request body is required.");
-
         var document = await GetExistingDocumentAsync(id, cancellationToken);
 
-        if (request.Description is not null)
-            document.Description = NormalizeDescription(request.Description);
+        if (description is not null)
+            document.Description = NormalizeDescription(description);
 
-        if (request.CollectionIds is not null)
-            await ReplaceCollectionsAsync(document, request.CollectionIds, cancellationToken);
+        if (collectionIds is not null)
+            await ReplaceCollectionsAsync(document, collectionIds, cancellationToken);
 
         _documents.Update(document);
         await _documents.SaveChangesAsync(cancellationToken);
