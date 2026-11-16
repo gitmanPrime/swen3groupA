@@ -1,0 +1,21 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY src/DMS.IndexingWorker/DMS.IndexingWorker.csproj src/DMS.IndexingWorker/
+COPY src/DMS.BLL/DMS.BLL.csproj src/DMS.BLL/
+COPY src/DMS.Domain/DMS.Domain.csproj src/DMS.Domain/
+
+RUN dotnet restore src/DMS.IndexingWorker/DMS.IndexingWorker.csproj
+
+COPY src/DMS.IndexingWorker/ src/DMS.IndexingWorker/
+COPY src/DMS.BLL/ src/DMS.BLL/
+COPY src/DMS.Domain/ src/DMS.Domain/
+
+RUN dotnet publish src/DMS.IndexingWorker/DMS.IndexingWorker.csproj \
+    -c Release -o /app/publish --no-restore /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+USER $APP_UID
+ENTRYPOINT ["dotnet", "DMS.IndexingWorker.dll"]

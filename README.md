@@ -50,23 +50,20 @@ and collection endpoints require authentication; missing or invalid tokens
 return 401. See [how-to-start.txt](how-to-start.txt) for startup and local
 development instructions.
 
-### Initialize the Elasticsearch document index
+### Document indexing
 
-From the repository root, run:
-
-```powershell
-docker compose --env-file DMS/.env -f DMS/docker-compose.yml run --rm elasticsearch-init
-```
-
+Docker Compose runs `elasticsearch-init` before starting the indexing worker.
 The initializer waits for Elasticsearch to become healthy and creates the
 `dms-documents` index using [documents-index.json](DMS/elasticsearch/documents-index.json).
-If the index already exists, the initializer exits successfully and preserves
-its contents.
+If the index already exists, the initializer preserves its contents.
+
+The indexing worker consumes OCR results from `ocr.results` and stores the
+extracted text in Elasticsearch using the original document ID. Failed results
+are retained in `ocr.results.failed`.
 
 Set `ELASTICSEARCH_URL` and `ELASTICSEARCH_INDEX_NAME` in `DMS/.env` to override
-the defaults. Compose passes these settings to the initializer as
-`Elasticsearch__Url` and `Elasticsearch__IndexName`. The default URL inside
-Compose is `http://elasticsearch:9200`. From the host, use
+the defaults for both the initializer and the indexing worker. The default URL
+inside Compose is `http://elasticsearch:9200`. From the host, use
 `http://127.0.0.1:9200`.
 
 ## Contributors
