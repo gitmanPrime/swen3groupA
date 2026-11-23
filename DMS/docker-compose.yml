@@ -97,6 +97,7 @@ services:
       RabbitMQ__UserName: ${RABBITMQ_USER:-dms}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD:-dms}
       RabbitMQ__QueueName: ocr.documents
+      RabbitMQ__ResultQueueName: ocr.results
     restart: unless-stopped
 
   indexing-worker:
@@ -185,6 +186,26 @@ services:
             ;;
           *) echo "Index check failed with HTTP $$status: $$index_url" >&2; exit 1 ;;
         esac
+
+  genai-worker:
+    build:
+      context: .
+      dockerfile: src/DMS.GenAiWorker/Dockerfile
+    container_name: dms-genai-worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER:-dms}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD:-dms}
+      RabbitMQ__QueueName: ocr.results
+      RabbitMQ__SummaryQueueName: genai.summaries
+      GenAi__ApiKey: ${GEMINI_API_KEY:?Set GEMINI_API_KEY in .env}
+      GenAi__Model: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      GenAi__TimeoutSeconds: 120
+    restart: unless-stopped
 
 volumes:
   rabbitmq_data:
